@@ -1,0 +1,87 @@
+/* General styles */
+body {
+    background-color: #f8f9fa;
+    padding: 20px;
+    font-family: 'Source Code Pro', monospace;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 600;
+}
+
+/* Card styles */
+.card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Form control styles */
+.form-select {
+    border-radius: 4px;
+    font-family: 'Source Code Pro', monospace;
+}
+
+#series-dropdown {
+    height: 200px;
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    transition: all 0.3s ease;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* Alert styles */
+.alert {
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-family: 'Source Code Pro', monospace;
+}
+
+/* Plot container styles */
+#timeseries-plot {
+    border-radius: 4px;
+    background-color: white;
+}
+
+/* Legend styles */
+#custom-legend {
+    max-height: calc(100% - 100px);
+    overflow-y: auto;
+    font-family: 'Source Code Pro', monospace;
+}
+
+/* Experiment details styles */
+#experiment-details p {
+    font-family: 'Source Code Pro', monospace;
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .row {
+        margin-bottom: 1rem;
+    }
+    
+    .col-9, .col-3 {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    #timeseries-plot {
+        height: 50vh !important;
+    }
+} 

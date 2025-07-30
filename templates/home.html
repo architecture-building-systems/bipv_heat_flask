@@ -1,0 +1,173 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h1 class="text-center mb-4">BIPV Heat Dashboard</h1>
+    </div>
+</div>
+
+<!-- Top section - 20% height -->
+<div class="row mb-3" style="height: 20vh;">
+    <!-- Left column - Experiment selection -->
+    <div class="col-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h3>Experiment Selection</h3>
+                <label for="experiment-dropdown" class="form-label">Select experiment:</label>
+                <select id="experiment-dropdown" class="form-select mb-3"></select>
+                <button id="download-button" class="btn btn-primary w-100">Download Raw Data</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right column - Experiment information -->
+    <div class="col-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h3>Experiment Information</h3>
+                <div id="file-status" class="mb-2"></div>
+                <div id="experiment-details"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom section - 80% height -->
+<div class="row" style="height: 70vh;">
+    <!-- Left side - Plot area (70%) -->
+    <div class="col-9">
+        <div class="card h-100">
+            <div class="card-body">
+                <div id="unit-warning" class="text-danger fw-bold mb-2"></div>
+                <div id="timeseries-plot" style="height: 90%;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right side - Controls and Legend (30%) -->
+    <div class="col-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h4>Series Selection</h4>
+                <label for="series-dropdown" class="form-label">Select series (multiple allowed):</label>
+                <select id="series-dropdown" class="form-select" multiple></select>
+                <hr>
+                <h4>Legend</h4>
+                <div id="custom-legend" style="font-size: 12px; line-height: 1.6;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentExperiment = null;
+let currentSeries = [];
+
+// Load experiments on page load
+$(document).ready(function() {
+    loadExperiments();
+});
+
+function loadExperiments() {
+    $.get('/api/experiments', function(data) {
+        const dropdown = $('#experiment-dropdown');
+        dropdown.empty();
+        
+        data.forEach(function(exp) {
+            dropdown.append($('<option>', {
+                value: exp.value,
+                text: exp.label
+            }));
+        });
+        
+        // Trigger change event to load first experiment
+        dropdown.trigger('change');
+    });
+}
+
+// Handle experiment selection
+$('#experiment-dropdown').change(function() {
+    const experimentCode = $(this).val();
+    if (!experimentCode) return;
+    
+    currentExperiment = experimentCode;
+    
+    $.get(`/api/experiment/${experimentCode}`, function(data) {
+        if (data.error) {
+            $('#file-status').html(`<div class="alert alert-danger">${data.error}</div>`);
+            return;
+        }
+        
+        // Update status
+        $('#file-status').html(`<div class="alert alert-success">${data.status}</div>`);
+        
+        // Update experiment details
+        const details = data.experiment_details;
+        let detailsHtml = '';
+        
+        if (details.status) {
+            detailsHtml = `<div class="alert alert-warning">${details.status}</div>`;
+        } else {
+            detailsHtml = `
+                <p><strong>Date:</strong> ${details.date}</p>
+                <p><strong>Monitor:</strong> ${details.monitor}</p>
+                <p><strong>IR:</strong> ${details.ir}</p>
+                <p><strong>Warm White:</strong> ${details.ww}</p>
+                <p><strong>Cold White:</strong> ${details.cw}</p>
+                <p><strong>Notes:</strong> <em>${details.notes}</em></p>
+            `;
+        }
+        $('#experiment-details').html(detailsHtml);
+        
+        // Update series dropdown
+        const seriesDropdown = $('#series-dropdown');
+        seriesDropdown.empty();
+        
+        data.series_options.forEach(function(series) {
+            seriesDropdown.append($('<option>', {
+                value: series.value,
+                text: series.label
+            }));
+        });
+        
+        // Select first option and trigger update
+        seriesDropdown.val(data.series_options[0]?.value);
+        currentSeries = [data.series_options[0]?.value];
+        updatePlot();
+    });
+});
+
+// Handle series selection
+$('#series-dropdown').change(function() {
+    currentSeries = $(this).val() || [];
+    updatePlot();
+});
+
+// Handle download button
+$('#download-button').click(function() {
+    if (!currentExperiment) return;
+    window.location.href = `/download/${currentExperiment}`;
+});
+
+function updatePlot() {
+    if (!currentExperiment || !currentSeries.length) return;
+    
+    const queryParams = new URLSearchParams();
+    queryParams.append('experiment', currentExperiment);
+    currentSeries.forEach(series => queryParams.append('series[]', series));
+    
+    $.get(`/api/plot?${queryParams.toString()}`, function(data) {
+        if (data.error) {
+            $('#unit-warning').text(data.error);
+            return;
+        }
+        
+        $('#unit-warning').text(data.warning || '');
+        Plotly.newPlot('timeseries-plot', data.plot.data, data.plot.layout);
+    });
+}
+</script>
+{% endblock %}
