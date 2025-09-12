@@ -1,0 +1,191 @@
+
+--- idx-500_spec_G-1000_T-20_A-0-Ti-2 ---
+LEDSS data for idx-500_spec_G-1000_T-20_A-0-Ti-2: list index out of range
+
+--- idx-500_spec_G-1000_T-20_A-0-Ti-2 ---
+LEDSS data for idx-500_spec_G-1000_T-20_A-0-Ti-2: list index out of range
+
+--- idx-500_spec_G-1000_T-20_A-0-Ti-2 ---
+LEDSS data for idx-500_spec_G-1000_T-20_A-0-Ti-2: list index out of range
+
+--- idx-500_spec_G-1000_T-20_A-0-Ti-2 ---
+LEDSS data for idx-500_spec_G-1000_T-20_A-0-Ti-2: list index out of range
+
+--- idx-136_hpl_G-1000_T-25_A-0_Ti-2 ---
+cDAQ data for idx-136_hpl_G-1000_T-25_A-0_Ti-2: list index out of range
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-136_hpl_G-1000_T-25_A-0_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-136_hpl_G-1000_T-25_A-0_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-019_reg_G-500_T-20_A-0_Ti-2 ---
+Top anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/060825.csv'
+Bottom anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/060825.csv'
+
+--- idx-020_reg_G-800_T-20_A-0_Ti-2 ---
+Top anemometer data for 070825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/070825.csv'
+Bottom anemometer data for 070825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/070825.csv'
+
+--- idx-022_reg_G-500_T-20_A-20_Ti-2 ---
+Top anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/060825.csv'
+Bottom anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/060825.csv'
+
+--- idx-023_reg_G-800_T-20_A-20_Ti-2 ---
+Top anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/060825.csv'
+Bottom anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/060825.csv'
+
+--- idx-025_reg_G-500_T-20_A-0_Ti-17 ---
+Top anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/060825.csv'
+Bottom anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/060825.csv'
+
+--- idx-026_reg_G-800_T-20_A-0_Ti-17 ---
+Top anemometer data for 070825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/070825.csv'
+Bottom anemometer data for 070825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/070825.csv'
+
+--- idx-028_reg_G-500_T-20_A-20_Ti-17 ---
+Top anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/060825.csv'
+Bottom anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/060825.csv'
+
+--- idx-029_reg_G-800_T-20_A-20_Ti-17 ---
+Top anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/060825.csv'
+Bottom anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/060825.csv'
+
+--- idx-031_reg_G-500_T-20_A-0_Ti-32 ---
+Top anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/060825.csv'
+Bottom anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/060825.csv'
+
+--- idx-032_reg_G-800_T-20_A-0_Ti-32 ---
+Top anemometer data for 070825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/070825.csv'
+Bottom anemometer data for 070825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/070825.csv'
+
+--- idx-034_reg_G-500_T-20_A-20_Ti-32 ---
+Top anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/060825.csv'
+Bottom anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/060825.csv'
+
+--- idx-035_reg_G-800_T-20_A-20_Ti-32 ---
+Top anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_top/060825.csv'
+Bottom anemometer data for 060825: [Errno 2] No such file or directory: '/Users/jmccarty/GitHub/bipv_heat/02_Phase2/data_acquisition/yes_pv/anemometer_bottom/060825.csv'
+
+--- idx-100_hpl_G-500_T-20_A-0_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-101_hpl_G-800_T-20_A-0_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-102_hpl_G-1000_T-20_A-0_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-105_hpl_G-1000_T-20_A-20_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-108_hpl_G-1000_T-20_A-0_Ti-17 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-111_hpl_G-1000_T-20_A-20_Ti-17 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-117_hpl_G-1000_T-20_A-20_Ti-32 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-120_hpl_G-1000_T-30_A-0_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-123_hpl_G-1000_T-30_A-20_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-132_hpl_G-1000_T-30_A-0_Ti-32 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-135_hpl_G-1000_T-30_A-20_Ti-32 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-139_hpl_G-1000_T-25_A-0_Ti-47 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-141_hpl_G-1000_T-25_A-20_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-161_hpl_G-1000_T-25 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-166_hpl_G-1000_T-25_A-0_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-167_hpl_G-1000_T-25_A-0_Ti-17 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-168_hpl_G-1000_T-25_A-0_Ti-32 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-169_hpl_G-800_T-25_A-0_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-170_hpl_G-800_T-25_A-0_Ti-17 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-172_hpl_G-500_T-25_A-0_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-173_hpl_G-500_T-25_A-0_Ti-17 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-174_hpl_G-500_T-25_A-0_Ti-32 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-178_hpl_G-800_T-25_A-20_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-179_hpl_G-800_T-25_A-20_Ti-17 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-180_hpl_G-800_T-25_A-20_Ti-32 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-181_hpl_G-500_T-25_A-20_Ti-2 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-182_hpl_G-500_T-25_A-20_Ti-17 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-183_hpl_G-500_T-25_A-20_Ti-32 ---
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+
+
+--- idx-404_dark_G-0_T-30_A-0_Ti-0 ---
+LEDSS data for idx-404_dark_G-0_T-30_A-0_Ti-0: list index out of range
+PVPM data for idx-404_dark_G-0_T-30_A-0_Ti-0: No PVPM files found
+Anemometer data: Error tokenizing data. C error: Expected 7 fields in line 13634, saw 8
+

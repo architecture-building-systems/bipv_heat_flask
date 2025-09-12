@@ -1,0 +1,20 @@
+
+=== Processing run at 2025-09-12 18:23:51 ===
+
+idx-142_hpl_G-1000_T-25_A-45_Ti-2:
+Missing fields: End cool down
+
+idx-171_hpl_G-800_T-25_A-0_Ti-32:
+Missing fields: End cool down
+
+idx-402_dark_G-0_T-12_A-0_Ti-0:
+Missing fields: End cool down
+
+idx-403_dark_G-0_T-20_A-0_Ti-0:
+Missing fields: End cool down
+
+idx-404_dark_G-0_T-30_A-0_Ti-0:
+Processing returned no data
+
+idx-405_dark_G-0_T-25_A-0_Ti-0:
+Missing fields: End cool down
