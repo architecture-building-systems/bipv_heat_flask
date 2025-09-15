@@ -4,18 +4,22 @@ import pickle
 import re
 from pathlib import Path
 from datetime import datetime, timedelta
-from flask import Flask, render_template, jsonify, send_file, request
+from flask import Flask, render_template, jsonify, send_file, request, redirect
 import pandas as pd
 import plotly
 import json
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
+import numpy as np
 
-app = Flask(__name__, static_folder="")
+app = Flask(__name__, static_folder="static")
 
 
 THIS_FOLDER = Path(__file__).parent.resolve()
 DATA_DIR = os.path.join(THIS_FOLDER, 'data')
+
+# Global cache for series ranges
+SERIES_RANGES_CACHE = None
 
 def list_feather_files():
     return [f for f in os.listdir(DATA_DIR) if f.endswith('.feather')]
@@ -24,6 +28,21 @@ def is_special_experiment(experiment_code):
     """Check if experiment code matches special pattern idx-9** where ** are digits 1-9"""
     pattern = r'^idx-9[1-9][1-9]$'
     return re.match(pattern, experiment_code) is not None
+
+def parse_experiment_characteristics(experiment_code):
+    """Parse experiment code to extract G, T, A, Ti values"""
+    # Pattern: idx-XXX_reg_G-[value]_T-[value]_A-[value]_Ti-[value]
+    pattern = r'idx-\d+_reg_G-(\d+)_T-(\d+)_A-(\d+)_Ti-(\d+)'
+    match = re.match(pattern, experiment_code)
+    
+    if match:
+        return {
+            'G': int(match.group(1)),  # Irradiance
+            'T': int(match.group(2)),  # Temperature
+            'A': int(match.group(3)),  # Azimuth
+            'Ti': int(match.group(4))  # Elevation
+        }
+    return None
 
 def get_experiment_log_file():
     """Get the single experiment log file"""
@@ -93,11 +112,64 @@ def get_unit(col):
         return unit
     return 'Unknown'
 
+def load_series_ranges():
+    """
+    Load series ranges from pre-computed JSON file.
+    This enables standardized y-axis ranges across all experiments.
+    """
+    global SERIES_RANGES_CACHE
+    
+    if SERIES_RANGES_CACHE is not None:
+        return SERIES_RANGES_CACHE
+    
+    ranges_file = os.path.join(DATA_DIR, 'series_range.json')
+    
+    try:
+        with open(ranges_file, 'r') as f:
+            series_ranges = json.load(f)
+        
+        SERIES_RANGES_CACHE = series_ranges
+        print(f"Loaded ranges for {len(series_ranges)} series from {ranges_file}")
+        return series_ranges
+        
+    except FileNotFoundError:
+        print(f"Warning: {ranges_file} not found. Y-axis ranges will not be standardized.")
+        return {}
+    except json.JSONDecodeError as e:
+        print(f"Error parsing {ranges_file}: {e}. Y-axis ranges will not be standardized.")
+        return {}
+    except Exception as e:
+        print(f"Error loading {ranges_file}: {e}. Y-axis ranges will not be standardized.")
+        return {}
+
+def clear_series_ranges_cache():
+    """Clear the cached series ranges (useful for development/testing)"""
+    global SERIES_RANGES_CACHE
+    SERIES_RANGES_CACHE = None
+    print("Series ranges cache cleared")
+
 
 
 @app.route('/')
 def index():
+    # Redirect to home page by default
+    return redirect('/home')
+
+@app.route('/home')
+def home():
     return render_template('home.html')
+
+@app.route('/single')
+def single():
+    return render_template('single.html')
+
+@app.route('/compare')
+def compare():
+    return render_template('compare.html')
+
+@app.route('/sensors')
+def sensors():
+    return render_template('sensors.html')
 
 @app.route('/api/experiments')
 def get_experiments():
@@ -129,6 +201,79 @@ def get_experiments():
     
     available_experiments.sort(key=lambda x: x['value'] if x['value'] else '')
     return jsonify(available_experiments)
+
+@app.route('/api/series-ranges')
+def get_series_ranges():
+    """API endpoint to get standardized series ranges"""
+    try:
+        ranges = load_series_ranges()
+        return jsonify({
+            'total_series': len(ranges),
+            'sample_ranges': {k: v for k, v in list(ranges.items())[:5]},  # First 5 for preview
+            'status': 'success'
+        })
+    except Exception as e:
+        return jsonify({'error': str(e), 'status': 'error'})
+
+@app.route('/api/experiment-characteristics')
+def get_experiment_characteristics():
+    """Get all experiments with their parsed characteristics and filter ranges"""
+    experiment_log = load_experiment_log()
+    experiments_with_chars = []
+    
+    # Collect all characteristics
+    all_G, all_T, all_A, all_Ti = [], [], [], []
+    
+    # Process experiments from log that have feather files
+    if experiment_log:
+        for exp_code in experiment_log.keys():
+            if feather_file_exists(exp_code):
+                chars = parse_experiment_characteristics(exp_code)
+                if chars:
+                    exp_data = experiment_log[exp_code]
+                    experiments_with_chars.append({
+                        'code': exp_code,
+                        'label': f"{exp_code} ({exp_data.get('Date', 'Unknown date')})",
+                        'characteristics': chars
+                    })
+                    all_G.append(chars['G'])
+                    all_T.append(chars['T'])
+                    all_A.append(chars['A'])
+                    all_Ti.append(chars['Ti'])
+    
+    # Process feather files not in log
+    feather_files = list_feather_files()
+    for feather_file in feather_files:
+        exp_code = feather_file.replace('.feather', '')
+        
+        # Skip if already processed from log
+        if experiment_log and exp_code in experiment_log:
+            continue
+            
+        chars = parse_experiment_characteristics(exp_code)
+        if chars:
+            experiments_with_chars.append({
+                'code': exp_code,
+                'label': f"{exp_code} (Data file)",
+                'characteristics': chars
+            })
+            all_G.append(chars['G'])
+            all_T.append(chars['T'])
+            all_A.append(chars['A'])
+            all_Ti.append(chars['Ti'])
+    
+    # Calculate ranges
+    ranges = {
+        'G': {'min': min(all_G) if all_G else 0, 'max': max(all_G) if all_G else 1000, 'values': sorted(set(all_G))},
+        'T': {'min': min(all_T) if all_T else 0, 'max': max(all_T) if all_T else 30, 'values': sorted(set(all_T))},
+        'A': {'min': min(all_A) if all_A else 0, 'max': max(all_A) if all_A else 45, 'values': sorted(set(all_A))},
+        'Ti': {'min': min(all_Ti) if all_Ti else 0, 'max': max(all_Ti) if all_Ti else 72, 'values': sorted(set(all_Ti))}
+    }
+    
+    return jsonify({
+        'experiments': experiments_with_chars,
+        'ranges': ranges
+    })
 
 @app.route('/api/experiment/<experiment_code>')
 def get_experiment_details(experiment_code):
@@ -247,7 +392,8 @@ def get_plot_data():
                     y=df[col], 
                     mode='lines', 
                     name=str(col),
-                    line=dict(width=2)
+                    line=dict(width=1),
+                    showlegend=True
                 ),
                 secondary_y=False
             )
@@ -261,7 +407,8 @@ def get_plot_data():
                         y=df[col], 
                         mode='lines', 
                         name=str(col),
-                        line=dict(dash='dash', width=2)
+                        line=dict(dash='dash', width=1),
+                        showlegend=True
                     ),
                     secondary_y=True
                 )
@@ -271,6 +418,38 @@ def get_plot_data():
         else:
             fig.update_yaxes(title_text=f"Value ({units[0]})", secondary_y=False)
         
+        # Apply standardized y-axis ranges
+        series_ranges = load_series_ranges()
+        
+        # Calculate ranges for primary y-axis (first unit)
+        primary_cols = unit_map[units[0]]
+        primary_min = float('inf')
+        primary_max = float('-inf')
+        
+        for col in primary_cols:
+            col_str = str(col)
+            if col_str in series_ranges:
+                primary_min = min(primary_min, series_ranges[col_str]['padded_min'])
+                primary_max = max(primary_max, series_ranges[col_str]['padded_max'])
+        
+        if primary_min != float('inf') and primary_max != float('-inf'):
+            fig.update_yaxes(range=[primary_min, primary_max], secondary_y=False)
+        
+        # Calculate ranges for secondary y-axis (second unit) if it exists
+        if use_secondary:
+            secondary_cols = unit_map[units[1]]
+            secondary_min = float('inf')
+            secondary_max = float('-inf')
+            
+            for col in secondary_cols:
+                col_str = str(col)
+                if col_str in series_ranges:
+                    secondary_min = min(secondary_min, series_ranges[col_str]['padded_min'])
+                    secondary_max = max(secondary_max, series_ranges[col_str]['padded_max'])
+            
+            if secondary_min != float('inf') and secondary_max != float('-inf'):
+                fig.update_yaxes(range=[secondary_min, secondary_max], secondary_y=True)
+        
         # Add experiment phase lines
         experiment_log = load_experiment_log()
         if experiment_log and experiment_code in experiment_log:
@@ -278,14 +457,14 @@ def get_plot_data():
             date = exp_data.get('Date', '')
             
             phases = [
-                ('Start time', 'green', 'solid'),
-                ('Start Warmup', 'orange', 'dash'),
-                ('Start measurement', 'red', 'solid'),
-                ('End measurement', 'red', 'dash'),
-                ('End cool down', 'blue', 'solid')
+                ('Start time', 'Start','grey', 'solid'),
+                ('Start Warmup', 'Warmup','grey', 'solid'),
+                ('Start measurement', 'Measurement begin','grey', 'solid'),
+                ('End measurement', 'Measurement end','grey', 'solid'),
+                ('End cool down', 'End ','grey', 'solid'),
             ]
             
-            for phase_name, color, line_style in phases:
+            for phase_name, phase_print_name, color, line_style in phases:
                 if phase_name in exp_data:
                     phase_time = parse_experiment_time(date, exp_data[phase_name])
                     if phase_time:
@@ -295,30 +474,72 @@ def get_plot_data():
                             y0=0, y1=1,
                             yref="paper",
                             line=dict(
-                                color=color,
-                                width=2,
-                                dash=line_style
+                                color="black",
+                                width=1,
+                                dash="dash"
                             )
                         )
                         fig.add_annotation(
                             x=phase_time,
-                            y=1.02,
+                            y=1.05,
                             yref="paper",
-                            text=phase_name,
+                            text=phase_print_name,
                             showarrow=False,
-                            textangle=-45,
+                            # textangle=-10,
+                            xanchor='left',
                             font=dict(size=10, color=color)
                         )
         
         # Update layout
         fig.update_layout(
             title=f"Experiment: {experiment_code}",
-            xaxis_title="Time",
-            showlegend=True
+            xaxis_title=None,
+            showlegend=False,  # Hide the default Plotly legend since we have a custom one
+    
+            # THEME & COLORS
+            template="plotly_white",  # or "plotly_dark", "simple_white", etc.
+            # plot_bgcolor="white",
+            # paper_bgcolor="white",
+            
+            # DIMENSIONS
+            
+            # FONTS
+            font=dict(
+                family="Source Code Pro, monospace",
+                size=10,
+                color="#333"
+            ),
+            
+            # TITLE STYLING
+            title_font=dict(size=16, color="#2c3e50"),
+            
+            # GRID & AXES
+            xaxis=dict(
+                showgrid=False,
+                gridwidth=1,
+                gridcolor="rgba(128,128,128,0.2)",
+                showline=True,
+                linewidth=1,
+                linecolor="black"
+            ),
+            
+            # MARGINS
+            margin=dict(l=50, r=50, t=50, b=50)
         )
+        
+        # Create legend data for custom legend
+        legend_data = []
+        for col in cols:
+            unit = get_unit(col)
+            legend_data.append({
+                'name': str(col),
+                'unit': unit,
+                'style': 'solid' if unit == units[0] else 'dashed'
+            })
         
         return jsonify({
             'plot': json.loads(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)),
+            'legend': legend_data,
             'warning': warning
         })
         

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BIPV Heat Dashboard{% endblock %}</title>
+    <!-- Google Fonts - Source Code Pro -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.35.3.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation Menu -->
+        <div class="header">
+            <div class="header-content">
+                <h1>BIPV Heat Dashboard</h1>
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="/home">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'single' %}active{% endif %}" href="/single">Single</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'compare' %}active{% endif %}" href="/compare">Compare</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'sensors' %}active{% endif %}" href="/sensors">Sensors</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="header-divider"></div>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

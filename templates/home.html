@@ -1,60 +1,219 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
+
+{% block title %}Home - BIPV Heat Dashboard{% endblock %}
 
 {% block content %}
-<div class="row mt-4">
+<!-- Hero Section -->
+<div class="row mb-5">
     <div class="col-12">
-        <h1 class="text-center mb-4">BIPV Heat Dashboard</h1>
-    </div>
-</div>
-
-<!-- Top section - 20% height -->
-<div class="row mb-3" style="height: 20vh;">
-    <!-- Left column - Experiment selection -->
-    <div class="col-6">
-        <div class="card h-100">
-            <div class="card-body">
-                <h3>Experiment Selection</h3>
-                <label for="experiment-dropdown" class="form-label">Select experiment:</label>
-                <select id="experiment-dropdown" class="form-select mb-3"></select>
-                <button id="download-button" class="btn btn-primary w-100">Download Raw Data</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Right column - Experiment information -->
-    <div class="col-6">
-        <div class="card h-100">
-            <div class="card-body">
-                <h3>Experiment Information</h3>
-                <div id="file-status" class="mb-2"></div>
-                <div id="experiment-details"></div>
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center py-5">
+                <h2 class="display-4 mb-3">BIPV Heat Research Project</h2>
+                <p class="lead">Building Integrated Photovoltaic Heat Transfer Analysis</p>
+                <p class="mb-0">Advancing sustainable building technologies through comprehensive thermal analysis</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Bottom section - 80% height -->
-<div class="row" style="height: 70vh;">
-    <!-- Left side - Plot area (70%) -->
-    <div class="col-9">
-        <div class="card h-100">
+<!-- Project Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
             <div class="card-body">
-                <div id="unit-warning" class="text-danger fw-bold mb-2"></div>
-                <div id="timeseries-plot" style="height: 90%;"></div>
+                <h3 class="card-title mb-4">Project Overview</h3>
+                <div class="row">
+                    <div class="col-md-8">
+                        <p>This research project focuses on understanding the thermal behavior of Building Integrated Photovoltaic (BIPV) systems. Our comprehensive analysis includes:</p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="text-primary">•</i> <strong>Thermal Performance Analysis:</strong> Measuring heat transfer characteristics of BIPV installations</li>
+                            <li class="mb-2"><i class="text-primary">•</i> <strong>Environmental Impact:</strong> Assessing energy efficiency and thermal comfort</li>
+                            <li class="mb-2"><i class="text-primary">•</i> <strong>Data-Driven Insights:</strong> Advanced sensor networks and real-time monitoring</li>
+                            <li class="mb-2"><i class="text-primary">•</i> <strong>Sustainable Solutions:</strong> Optimizing building energy performance</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded">
+                            <h5>Quick Stats</h5>
+                            <hr>
+                            <p class="mb-1"><strong>Active Experiments:</strong> <span class="text-primary" id="experiment-count">Loading...</span></p>
+                            <p class="mb-1"><strong>Data Points:</strong> Thousands</p>
+                            <p class="mb-0"><strong>Research Focus:</strong> Thermal Analysis</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- Right side - Controls and Legend (30%) -->
-    <div class="col-3">
-        <div class="card h-100">
+</div>
+
+<!-- Research Team -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
             <div class="card-body">
-                <h4>Series Selection</h4>
-                <label for="series-dropdown" class="form-label">Select series (multiple allowed):</label>
-                <select id="series-dropdown" class="form-select" multiple></select>
-                <hr>
-                <h4>Legend</h4>
-                <div id="custom-legend" style="font-size: 12px; line-height: 1.6;"></div>
+                <h3 class="card-title mb-4">Research Team</h3>
+                <div class="row">
+                    <!-- Team Member Template - You can add actual team members here -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <div class="text-center">
+                            <div class="bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <i class="text-muted" style="font-size: 3rem;">👤</i>
+                            </div>
+                            <h5>Dr. Research Lead</h5>
+                            <p class="text-muted mb-1">Principal Investigator</p>
+                            <p class="small">Thermal Engineering & BIPV Systems</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <div class="text-center">
+                            <div class="bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <i class="text-muted" style="font-size: 3rem;">👤</i>
+                            </div>
+                            <h5>Data Scientist</h5>
+                            <p class="text-muted mb-1">Senior Researcher</p>
+                            <p class="small">Data Analysis & Modeling</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <div class="text-center">
+                            <div class="bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <i class="text-muted" style="font-size: 3rem;">👤</i>
+                            </div>
+                            <h5>Lab Technician</h5>
+                            <p class="text-muted mb-1">Research Assistant</p>
+                            <p class="small">Instrumentation & Testing</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <div class="text-center">
+                            <div class="bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <i class="text-muted" style="font-size: 3rem;">👤</i>
+                            </div>
+                            <h5>Graduate Student</h5>
+                            <p class="text-muted mb-1">PhD Candidate</p>
+                            <p class="small">Thermal Modeling</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info">
+                    <strong>Note:</strong> To add actual team photos, place image files in the <code>/static/images/team/</code> directory and update the template accordingly.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Research Facilities -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title mb-4">Research Facilities & Equipment</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-primary rounded p-2">
+                                    <i class="text-white" style="font-size: 1.5rem;">🔬</i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5>Thermal Testing Lab</h5>
+                                <p class="text-muted">State-of-the-art facility for BIPV thermal characterization</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-success rounded p-2">
+                                    <i class="text-white" style="font-size: 1.5rem;">📊</i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5>Data Acquisition Systems</h5>
+                                <p class="text-muted">High-precision sensors and real-time monitoring</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-warning rounded p-2">
+                                    <i class="text-white" style="font-size: 1.5rem;">🌡️</i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5>Climate Control Chamber</h5>
+                                <p class="text-muted">Controlled environment testing capabilities</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-info rounded p-2">
+                                    <i class="text-white" style="font-size: 1.5rem;">💻</i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5>Computational Analysis</h5>
+                                <p class="text-muted">Advanced modeling and simulation software</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Navigation -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title mb-4">Dashboard Navigation</h3>
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <a href="/single" class="text-decoration-none">
+                            <div class="bg-light p-4 rounded hover-shadow">
+                                <i style="font-size: 2rem;">📈</i>
+                                <h5 class="mt-2">Single</h5>
+                                <p class="text-muted small">View individual experiment data</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/compare" class="text-decoration-none">
+                            <div class="bg-light p-4 rounded hover-shadow">
+                                <i style="font-size: 2rem;">⚖️</i>
+                                <h5 class="mt-2">Compare</h5>
+                                <p class="text-muted small">Compare multiple experiments</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/sensors" class="text-decoration-none">
+                            <div class="bg-light p-4 rounded hover-shadow">
+                                <i style="font-size: 2rem;">🔧</i>
+                                <h5 class="mt-2">Sensors</h5>
+                                <p class="text-muted small">Sensor configurations</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="bg-light p-4 rounded">
+                            <i style="font-size: 2rem;">📋</i>
+                            <h5 class="mt-2">Documentation</h5>
+                            <p class="text-muted small">Coming soon</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -63,111 +222,14 @@
 
 {% block scripts %}
 <script>
-let currentExperiment = null;
-let currentSeries = [];
-
-// Load experiments on page load
+// Load experiment count for the stats section
 $(document).ready(function() {
-    loadExperiments();
-});
-
-function loadExperiments() {
     $.get('/api/experiments', function(data) {
-        const dropdown = $('#experiment-dropdown');
-        dropdown.empty();
-        
-        data.forEach(function(exp) {
-            dropdown.append($('<option>', {
-                value: exp.value,
-                text: exp.label
-            }));
-        });
-        
-        // Trigger change event to load first experiment
-        dropdown.trigger('change');
-    });
-}
-
-// Handle experiment selection
-$('#experiment-dropdown').change(function() {
-    const experimentCode = $(this).val();
-    if (!experimentCode) return;
-    
-    currentExperiment = experimentCode;
-    
-    $.get(`/api/experiment/${experimentCode}`, function(data) {
-        if (data.error) {
-            $('#file-status').html(`<div class="alert alert-danger">${data.error}</div>`);
-            return;
-        }
-        
-        // Update status
-        $('#file-status').html(`<div class="alert alert-success">${data.status}</div>`);
-        
-        // Update experiment details
-        const details = data.experiment_details;
-        let detailsHtml = '';
-        
-        if (details.status) {
-            detailsHtml = `<div class="alert alert-warning">${details.status}</div>`;
-        } else {
-            detailsHtml = `
-                <p><strong>Date:</strong> ${details.date}</p>
-                <p><strong>Monitor:</strong> ${details.monitor}</p>
-                <p><strong>IR:</strong> ${details.ir}</p>
-                <p><strong>Warm White:</strong> ${details.ww}</p>
-                <p><strong>Cold White:</strong> ${details.cw}</p>
-                <p><strong>Notes:</strong> <em>${details.notes}</em></p>
-            `;
-        }
-        $('#experiment-details').html(detailsHtml);
-        
-        // Update series dropdown
-        const seriesDropdown = $('#series-dropdown');
-        seriesDropdown.empty();
-        
-        data.series_options.forEach(function(series) {
-            seriesDropdown.append($('<option>', {
-                value: series.value,
-                text: series.label
-            }));
-        });
-        
-        // Select first option and trigger update
-        seriesDropdown.val(data.series_options[0]?.value);
-        currentSeries = [data.series_options[0]?.value];
-        updatePlot();
+        const count = data.filter(exp => exp.value !== null).length;
+        $('#experiment-count').text(count);
+    }).fail(function() {
+        $('#experiment-count').text('N/A');
     });
 });
-
-// Handle series selection
-$('#series-dropdown').change(function() {
-    currentSeries = $(this).val() || [];
-    updatePlot();
-});
-
-// Handle download button
-$('#download-button').click(function() {
-    if (!currentExperiment) return;
-    window.location.href = `/download/${currentExperiment}`;
-});
-
-function updatePlot() {
-    if (!currentExperiment || !currentSeries.length) return;
-    
-    const queryParams = new URLSearchParams();
-    queryParams.append('experiment', currentExperiment);
-    currentSeries.forEach(series => queryParams.append('series[]', series));
-    
-    $.get(`/api/plot?${queryParams.toString()}`, function(data) {
-        if (data.error) {
-            $('#unit-warning').text(data.error);
-            return;
-        }
-        
-        $('#unit-warning').text(data.warning || '');
-        Plotly.newPlot('timeseries-plot', data.plot.data, data.plot.layout);
-    });
-}
 </script>
 {% endblock %}

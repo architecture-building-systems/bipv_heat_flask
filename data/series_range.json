@@ -1,0 +1,779 @@
+{
+  "Comfort Cube_metabolic_rate-mets": {
+    "min": 1.1,
+    "max": 1.1,
+    "unit": "mets",
+    "padded_min": 1.0,
+    "padded_max": 1.2000000000000002
+  },
+  "Comfort Cube_clo_value-clo": {
+    "min": 0.6099999999999999,
+    "max": 0.6100000000000001,
+    "unit": "clo",
+    "padded_min": 0.6099999999999999,
+    "padded_max": 0.6100000000000001
+  },
+  "Comfort Cube_local_air_control-binary": {
+    "min": 0.0,
+    "max": 1.0,
+    "unit": "binary",
+    "padded_min": -0.05,
+    "padded_max": 1.05
+  },
+  "Comfort Cube_sd_card_status-binary": {
+    "min": 1.0,
+    "max": 1.0,
+    "unit": "binary",
+    "padded_min": 0.9,
+    "padded_max": 1.1
+  },
+  "Comfort Cube_mean_radiant_temperature-degrees_celsius": {
+    "min": 12.632105055292259,
+    "max": 32.77,
+    "unit": "degrees_celsius",
+    "padded_min": 11.625210308056872,
+    "padded_max": 33.77689474723539
+  },
+  "Comfort Cube_longwave_radiance-degrees_celsius": {
+    "min": 12.632105055292259,
+    "max": 31.906196610956357,
+    "unit": "degrees_celsius",
+    "padded_min": 11.668400477509055,
+    "padded_max": 32.86990118873956
+  },
+  "Comfort Cube_shortwave_radiance-degrees_celsius": {
+    "min": 0.0,
+    "max": 0.87,
+    "unit": "degrees_celsius",
+    "padded_min": -0.043500000000000004,
+    "padded_max": 0.9135
+  },
+  "Comfort Cube_air_temperature-degrees_celsius": {
+    "min": 12.141239139020538,
+    "max": 34.123674558960076,
+    "unit": "degrees_celsius",
+    "padded_min": 11.042117368023561,
+    "padded_max": 35.222796329957056
+  },
+  "Comfort Cube_humidity-percent": {
+    "min": 36.69,
+    "max": 75.65217578855601,
+    "unit": "percent",
+    "padded_min": 34.7418912105722,
+    "padded_max": 77.60028457798381
+  },
+  "Comfort Cube_air_speed-meters_per_second": {
+    "min": 0.0,
+    "max": 0.52,
+    "unit": "meters_per_second",
+    "padded_min": -0.026000000000000002,
+    "padded_max": 0.546
+  },
+  "Comfort Cube_wind_cooling_effect-degrees_celsius": {
+    "min": 0.0,
+    "max": 3.05,
+    "unit": "degrees_celsius",
+    "padded_min": -0.1525,
+    "padded_max": 3.2024999999999997
+  },
+  "Comfort Cube_standard_effective_temperature-degrees_celsius": {
+    "min": 12.257127083333334,
+    "max": 32.26,
+    "unit": "degrees_celsius",
+    "padded_min": 11.2569834375,
+    "padded_max": 33.26014364583333
+  },
+  "Comfort Cube_operative_temperature-degrees_celsius": {
+    "min": 12.337144549763032,
+    "max": 33.48,
+    "unit": "degrees_celsius",
+    "padded_min": 11.280001777251183,
+    "padded_max": 34.53714277251184
+  },
+  "Comfort Cube_wetbulb_globe_temperature-dergees_celsius": {
+    "min": 10.385882701421801,
+    "max": 26.0,
+    "unit": "dergees_celsius",
+    "padded_min": 9.605176836492891,
+    "padded_max": 26.780705864928912
+  },
+  "Comfort Cube_CO2-ppm": {
+    "min": 402.2475189009662,
+    "max": 884.1236363636364,
+    "unit": "ppm",
+    "padded_min": 378.1537130278327,
+    "padded_max": 908.2174422367699
+  },
+  "Comfort Cube_volatile_organic_compounds_index-unitless": {
+    "min": 0.0,
+    "max": 483.0,
+    "unit": "unitless",
+    "padded_min": -24.150000000000002,
+    "padded_max": 507.15
+  },
+  "Comfort Cube_nitrogen_oxide_index-unitless": {
+    "min": 0.0,
+    "max": 2.0,
+    "unit": "unitless",
+    "padded_min": -0.1,
+    "padded_max": 2.1
+  },
+  "Comfort Cube_ashrae_55_pass_fail-binary": {
+    "min": -1.0,
+    "max": 1.0,
+    "unit": "binary",
+    "padded_min": -1.1,
+    "padded_max": 1.1
+  },
+  "Comfort Cube_en_16798_pass_fail-binary": {
+    "min": -1.0,
+    "max": 1.0,
+    "unit": "binary",
+    "padded_min": -1.1,
+    "padded_max": 1.1
+  },
+  "Comfort Cube_en_16798_category-en_16798_1_category_system": {
+    "min": 1.0,
+    "max": 4.0,
+    "unit": "en_16798_1_category_system",
+    "padded_min": 0.85,
+    "padded_max": 4.15
+  },
+  "Comfort Cube_pass_fail_reasons-categorical": {
+    "min": -1.0,
+    "max": 5.0,
+    "unit": "categorical",
+    "padded_min": -1.3,
+    "padded_max": 5.3
+  },
+  "Comfort Cube_percent_people_dissatisfied_ashrae55-percent": {
+    "min": 5.008658333333334,
+    "max": 99.9995,
+    "unit": "percent",
+    "padded_min": 0.25911624999999994,
+    "padded_max": 104.74904208333334
+  },
+  "Comfort Cube_predicted_mean_vote_ashrae55-pmv_index": {
+    "min": -4.540335416666667,
+    "max": 2.53,
+    "unit": "pmv_index",
+    "padded_min": -4.8938521875,
+    "padded_max": 2.8835167708333334
+  },
+  "Comfort Cube_longwave_radiant_temp_up-degrees_celsius": {
+    "min": 12.409191350710902,
+    "max": 32.01017177344475,
+    "unit": "degrees_celsius",
+    "padded_min": 11.429142329574209,
+    "padded_max": 32.99022079458145
+  },
+  "Comfort Cube_longwave_radiant_temp_north-degrees_celsius": {
+    "min": 12.570523086912544,
+    "max": 31.71083993330554,
+    "unit": "degrees_celsius",
+    "padded_min": 11.613507244592896,
+    "padded_max": 32.66785577562519
+  },
+  "Comfort Cube_longwave_radiant_temp_east-degrees_celsius": {
+    "min": 12.658062388601023,
+    "max": 31.809791086350973,
+    "unit": "degrees_celsius",
+    "padded_min": 11.700475953713525,
+    "padded_max": 32.76737752123847
+  },
+  "Comfort Cube_longwave_radiant_temp_south-degrees_celsius": {
+    "min": 12.706582740916271,
+    "max": 29.419574048282268,
+    "unit": "degrees_celsius",
+    "padded_min": 11.870933175547972,
+    "padded_max": 30.255223613650568
+  },
+  "Comfort Cube_longwave_radiant_temp_west-degrees_celsius": {
+    "min": 12.903166469194312,
+    "max": 29.433333333333334,
+    "unit": "degrees_celsius",
+    "padded_min": 12.076658125987361,
+    "padded_max": 30.259841676540283
+  },
+  "Comfort Cube_longwave_radiant_temp_down-degrees_celsius": {
+    "min": 12.518357030015798,
+    "max": 37.10564531104921,
+    "unit": "degrees_celsius",
+    "padded_min": 11.288992615964126,
+    "padded_max": 38.33500972510088
+  },
+  "Comfort Cube_shortwave_radiance_up-watts_per_sqm_per_steridian": {
+    "min": 0.0,
+    "max": 6.227122750275211,
+    "unit": "watts_per_sqm_per_steridian",
+    "padded_min": -0.31135613751376057,
+    "padded_max": 6.538478887788972
+  },
+  "Comfort Cube_shortwave_radiance_north-watts_per_sqm_per_steridian": {
+    "min": 0.0,
+    "max": 2.02940160394818,
+    "unit": "watts_per_sqm_per_steridian",
+    "padded_min": -0.101470080197409,
+    "padded_max": 2.130871684145589
+  },
+  "Comfort Cube_shortwave_radiance_east-watts_per_sqm_per_steridian": {
+    "min": 0.0,
+    "max": 0.9181041666666668,
+    "unit": "watts_per_sqm_per_steridian",
+    "padded_min": -0.04590520833333334,
+    "padded_max": 0.9640093750000002
+  },
+  "Comfort Cube_shortwave_radiance_south-watts_per_sqm_per_steridian": {
+    "min": 0.0,
+    "max": 0.14338891204668613,
+    "unit": "watts_per_sqm_per_steridian",
+    "padded_min": -0.007169445602334307,
+    "padded_max": 0.15055835764902045
+  },
+  "Comfort Cube_shortwave_radiance_west-watts_per_sqm_per_steridian": {
+    "min": 0.0,
+    "max": 0.54,
+    "unit": "watts_per_sqm_per_steridian",
+    "padded_min": -0.027000000000000003,
+    "padded_max": 0.5670000000000001
+  },
+  "Comfort Cube_shortwave_radiance_down-watts_per_sqm_per_steridian": {
+    "min": 0.0,
+    "max": 28.51,
+    "unit": "watts_per_sqm_per_steridian",
+    "padded_min": -1.4255000000000002,
+    "padded_max": 29.9355
+  },
+  "cDAQ_time_elapsed-seconds": {
+    "min": 12.10625,
+    "max": 191343.32,
+    "unit": "seconds",
+    "padded_min": -9554.454437499999,
+    "padded_max": 200909.8806875
+  },
+  "cDAQ_panel_row1_col2_top_surface_temperature-degrees_celsius": {
+    "min": 12.56,
+    "max": 77.95904583333333,
+    "unit": "degrees_celsius",
+    "padded_min": 9.290047708333333,
+    "padded_max": 81.228998125
+  },
+  "cDAQ_panel_row1_col2_center_surface_temperature-degrees_celsius": {
+    "min": 12.65,
+    "max": 75.17123333333333,
+    "unit": "degrees_celsius",
+    "padded_min": 9.523938333333334,
+    "padded_max": 78.297295
+  },
+  "cDAQ_panel_row1_col2_bottom_surface_temperature-degrees_celsius": {
+    "min": 12.62,
+    "max": 73.45808333333333,
+    "unit": "degrees_celsius",
+    "padded_min": 9.578095833333332,
+    "padded_max": 76.4999875
+  },
+  "cDAQ_panel_row2_col2_top_surface_temperature-degrees_celsius": {
+    "min": 12.51,
+    "max": 77.62456666666667,
+    "unit": "degrees_celsius",
+    "padded_min": 9.254271666666666,
+    "padded_max": 80.880295
+  },
+  "cDAQ_panel_row2_col2_center_surface_temperature-degrees_celsius": {
+    "min": 12.49,
+    "max": 75.89938333333333,
+    "unit": "degrees_celsius",
+    "padded_min": 9.319530833333333,
+    "padded_max": 79.0698525
+  },
+  "cDAQ_panel_row2_col2_bottom_surface_temperature-degrees_celsius": {
+    "min": 12.521433691756272,
+    "max": 70.9856731662024,
+    "unit": "degrees_celsius",
+    "padded_min": 9.598221718033965,
+    "padded_max": 73.9088851399247
+  },
+  "cDAQ_interior_facade_top_surface_temperature-degrees_celsius": {
+    "min": 20.33,
+    "max": 23.61952879581152,
+    "unit": "degrees_celsius",
+    "padded_min": 20.165523560209422,
+    "padded_max": 23.784005235602095
+  },
+  "cDAQ_interior_facade_center_surface_temperature-degrees_celsius": {
+    "min": 20.53,
+    "max": 23.55813845258871,
+    "unit": "degrees_celsius",
+    "padded_min": 20.378593077370567,
+    "padded_max": 23.709545375218145
+  },
+  "cDAQ_panel_row3_col2_top_surface_temperature-degrees_celsius": {
+    "min": 12.27,
+    "max": 83.52794583333333,
+    "unit": "degrees_celsius",
+    "padded_min": 8.707102708333332,
+    "padded_max": 87.090843125
+  },
+  "cDAQ_panel_row3_col2_center_surface_temperature-degrees_celsius": {
+    "min": 12.57,
+    "max": 74.72722083333333,
+    "unit": "degrees_celsius",
+    "padded_min": 9.462138958333334,
+    "padded_max": 77.835081875
+  },
+  "cDAQ_panel_row3_col2_bottom_surface_temperature-degrees_celsius": {
+    "min": 12.25,
+    "max": 70.02,
+    "unit": "degrees_celsius",
+    "padded_min": 9.3615,
+    "padded_max": 72.90849999999999
+  },
+  "cDAQ_panel_row4_col2_top_surface_temperature-degrees_celsius": {
+    "min": 13.61,
+    "max": 75.6027375,
+    "unit": "degrees_celsius",
+    "padded_min": 10.510363125,
+    "padded_max": 78.702374375
+  },
+  "cDAQ_panel_row4_col2_center_surface_temperature-degrees_celsius": {
+    "min": 11.95,
+    "max": 69.45085,
+    "unit": "degrees_celsius",
+    "padded_min": 9.0749575,
+    "padded_max": 72.32589250000001
+  },
+  "cDAQ_panel_row4_col2_bottom_surface_temperature-degrees_celsius": {
+    "min": 12.18,
+    "max": 67.61,
+    "unit": "degrees_celsius",
+    "padded_min": 9.4085,
+    "padded_max": 70.3815
+  },
+  "cDAQ_interior_facade_bottom_surface_temperature-degrees_celsius": {
+    "min": 20.239666666666665,
+    "max": 23.390226876090754,
+    "unit": "degrees_celsius",
+    "padded_min": 20.08213865619546,
+    "padded_max": 23.547754886561957
+  },
+  "cDAQ_facade_air_cavity_row4_col2_air_temperature-degrees_celsius": {
+    "min": 12.148833819241984,
+    "max": 37.15186440677966,
+    "unit": "degrees_celsius",
+    "padded_min": 10.8986822898651,
+    "padded_max": 38.402015936156545
+  },
+  "cDAQ_facade_air_cavity_row3_col2_air_temperature-degrees_celsius": {
+    "min": 12.477167846730529,
+    "max": 45.341661807580174,
+    "unit": "degrees_celsius",
+    "padded_min": 10.833943148688046,
+    "padded_max": 46.984886505622654
+  },
+  "cDAQ_facade_air_cavity_row2_col2_air_temperature-degrees_celsius": {
+    "min": 12.6,
+    "max": 51.65432083333333,
+    "unit": "degrees_celsius",
+    "padded_min": 10.647283958333333,
+    "padded_max": 53.607036875
+  },
+  "cDAQ_facade_air_cavity_row4_col1_air_temperature-degrees_celsius": {
+    "min": 12.225501874219075,
+    "max": 35.49205919132972,
+    "unit": "degrees_celsius",
+    "padded_min": 11.062174008363543,
+    "padded_max": 36.65538705718526
+  },
+  "cDAQ_facade_air_cavity_row1_col1_air_temperature-degrees_celsius": {
+    "min": 12.76,
+    "max": 50.39148560817084,
+    "unit": "degrees_celsius",
+    "padded_min": 10.878425719591458,
+    "padded_max": 52.27305988857938
+  },
+  "cDAQ_facade_air_cavity_row1_col3_air_temperature-degrees_celsius": {
+    "min": 12.65,
+    "max": 51.25604456824513,
+    "unit": "degrees_celsius",
+    "padded_min": 10.719697771587743,
+    "padded_max": 53.18634679665739
+  },
+  "cDAQ_facade_air_cavity_row4_col3_air_temperature-degrees_celsius": {
+    "min": 12.391665972511454,
+    "max": 37.772687499999996,
+    "unit": "degrees_celsius",
+    "padded_min": 11.122614896137026,
+    "padded_max": 39.04173857637442
+  },
+  "cDAQ_facade_insulation_probe_shallow-degrees_celsius": {
+    "min": 19.648566308243726,
+    "max": 24.03,
+    "unit": "degrees_celsius",
+    "padded_min": 19.429494623655913,
+    "padded_max": 24.249071684587815
+  },
+  "cDAQ_facade_insulation_probe_middle-degrees_celsius": {
+    "min": 17.44,
+    "max": 28.86,
+    "unit": "degrees_celsius",
+    "padded_min": 16.869,
+    "padded_max": 29.431
+  },
+  "cDAQ_facade_insulation_probe_deepest-degrees_celsius": {
+    "min": 16.55,
+    "max": 31.61,
+    "unit": "degrees_celsius",
+    "padded_min": 15.797,
+    "padded_max": 32.363
+  },
+  "cDAQ_interior_facade_air_temperature-degrees_celsius": {
+    "min": 20.21,
+    "max": 23.36023851076207,
+    "unit": "degrees_celsius",
+    "padded_min": 20.0524880744619,
+    "padded_max": 23.517750436300172
+  },
+  "cDAQ_interior_cube_air_temperature-degrees_celsius": {
+    "min": 20.200508333333335,
+    "max": 22.500504166666666,
+    "unit": "degrees_celsius",
+    "padded_min": 20.08550854166667,
+    "padded_max": 22.61550395833333
+  },
+  "cDAQ_facade_side_globe_top_temperature-degrees_celsius": {
+    "min": 12.272867383512544,
+    "max": 57.79,
+    "unit": "degrees_celsius",
+    "padded_min": 9.99701075268817,
+    "padded_max": 60.06585663082437
+  },
+  "cDAQ_facade_side_globe_middle_temperature-degrees_celsius": {
+    "min": 12.26,
+    "max": 61.11999999999999,
+    "unit": "degrees_celsius",
+    "padded_min": 9.817,
+    "padded_max": 63.56299999999999
+  },
+  "cDAQ_facade_side_globe_bottom_temperature-degrees_celsius": {
+    "min": 12.3,
+    "max": 61.65,
+    "unit": "degrees_celsius",
+    "padded_min": 9.832500000000001,
+    "padded_max": 64.11749999999999
+  },
+  "cDAQ_facade_side_top_air_temperature-degrees_celsius": {
+    "min": 12.09,
+    "max": 36.25199500208246,
+    "unit": "degrees_celsius",
+    "padded_min": 10.881900249895876,
+    "padded_max": 37.460094752186585
+  },
+  "cDAQ_facade_side_middle_air_temperature-degrees_celsius": {
+    "min": 12.13,
+    "max": 36.07,
+    "unit": "degrees_celsius",
+    "padded_min": 10.933000000000002,
+    "padded_max": 37.267
+  },
+  "cDAQ_facade_side_bottom_air_temperature-degrees_celsius": {
+    "min": 12.148566308243728,
+    "max": 36.48234166666666,
+    "unit": "degrees_celsius",
+    "padded_min": 10.931877540322581,
+    "padded_max": 37.69903043458781
+  },
+  "Nano Cube_average_air_temperature-degrees_celsius": {
+    "min": 21.577391304347824,
+    "max": 24.9268,
+    "unit": "degrees_celsius",
+    "padded_min": 21.409920869565216,
+    "padded_max": 25.094270434782608
+  },
+  "Nano Cube_average_radiant_temperature-degrees_celsius": {
+    "min": 19.746333333333332,
+    "max": 22.60533333333333,
+    "unit": "degrees_celsius",
+    "padded_min": 19.603383333333333,
+    "padded_max": 22.74828333333333
+  },
+  "Nano Cube_up_radiant_temperature-degrees_celsius": {
+    "min": 19.0007,
+    "max": 21.414833333333334,
+    "unit": "degrees_celsius",
+    "padded_min": 18.87999333333333,
+    "padded_max": 21.53554
+  },
+  "Nano Cube_north_radiant_temperature-degrees_celsius": {
+    "min": 19.670350000000003,
+    "max": 22.8925,
+    "unit": "degrees_celsius",
+    "padded_min": 19.509242500000003,
+    "padded_max": 23.0536075
+  },
+  "Nano Cube_east_radiant_temperature-degrees_celsius": {
+    "min": 19.73219166666667,
+    "max": 22.7455,
+    "unit": "degrees_celsius",
+    "padded_min": 19.581526250000003,
+    "padded_max": 22.896165416666665
+  },
+  "Nano Cube_south_radiant_temperature-degrees_celsius": {
+    "min": 20.1991625,
+    "max": 22.98175845410628,
+    "unit": "degrees_celsius",
+    "padded_min": 20.060032702294684,
+    "padded_max": 23.120888251811596
+  },
+  "Nano Cube_west_radiant_temperature-degrees_celsius": {
+    "min": 19.998833333333334,
+    "max": 22.953500000000002,
+    "unit": "degrees_celsius",
+    "padded_min": 19.8511,
+    "padded_max": 23.101233333333337
+  },
+  "Nano Cube_down_radiant_temperature-degrees_celsius": {
+    "min": 19.792333333333332,
+    "max": 22.691,
+    "unit": "degrees_celsius",
+    "padded_min": 19.647399999999998,
+    "padded_max": 22.835933333333333
+  },
+  "LEDSS_module_number-unitless": {
+    "min": 2.0,
+    "max": 35.0,
+    "unit": "unitless",
+    "padded_min": 0.34999999999999987,
+    "padded_max": 36.65
+  },
+  "LEDSS_power_infrared-percent": {
+    "min": 0.0,
+    "max": 60.0,
+    "unit": "percent",
+    "padded_min": -3.0,
+    "padded_max": 63.0
+  },
+  "LEDSS_power_warm_white-percent": {
+    "min": 0.0,
+    "max": 61.0,
+    "unit": "percent",
+    "padded_min": -3.0500000000000003,
+    "padded_max": 64.05
+  },
+  "LEDSS_power_cold_white-percent": {
+    "min": 0.0,
+    "max": 61.0,
+    "unit": "percent",
+    "padded_min": -3.0500000000000003,
+    "padded_max": 64.05
+  },
+  "LEDSS_resistor1_temperature-degrees_celsius": {
+    "min": 14.63,
+    "max": 65.22154318074564,
+    "unit": "degrees_celsius",
+    "padded_min": 12.100422840962718,
+    "padded_max": 67.75112033978293
+  },
+  "LEDSS_resistor2_temperature-degrees_celsius": {
+    "min": 14.63,
+    "max": 64.70969797074092,
+    "unit": "degrees_celsius",
+    "padded_min": 12.126015101462954,
+    "padded_max": 67.21368286927796
+  },
+  "LEDSS_resistor3_temperature-degrees_celsius": {
+    "min": 14.769999999999998,
+    "max": 70.94418121755545,
+    "unit": "degrees_celsius",
+    "padded_min": 11.961290939122225,
+    "padded_max": 73.75289027843323
+  },
+  "LEDSS_target_position_vertical-degrees": {
+    "min": -26.992,
+    "max": 340.0,
+    "unit": "degrees",
+    "padded_min": -45.3416,
+    "padded_max": 358.3496
+  },
+  "LEDSS_actual_position_horizontal-degrees": {
+    "min": -139.489,
+    "max": 424.0,
+    "unit": "degrees",
+    "padded_min": -167.66345,
+    "padded_max": 452.17445
+  },
+  "LEDSS_target_position_ledss_vertical-degrees": {
+    "min": 0.0,
+    "max": 390.39,
+    "unit": "degrees",
+    "padded_min": -19.5195,
+    "padded_max": 409.9095
+  },
+  "LEDSS_target_position_ledss_horizontal-degrees": {
+    "min": 0.0,
+    "max": 438.39,
+    "unit": "degrees",
+    "padded_min": -21.9195,
+    "padded_max": 460.30949999999996
+  },
+  "LEDSS_target_position_winch_x-millimeters": {
+    "min": 0.0,
+    "max": 379.6,
+    "unit": "millimeters",
+    "padded_min": -18.98,
+    "padded_max": 398.58000000000004
+  },
+  "LEDSS_target_position_winch_y-millimeters": {
+    "min": 0.0,
+    "max": 10.69,
+    "unit": "millimeters",
+    "padded_min": -0.5345,
+    "padded_max": 11.224499999999999
+  },
+  "LEDSS_room_air_temperature_sensor1-degrees_celsius": {
+    "min": 0.0,
+    "max": 76.9,
+    "unit": "degrees_celsius",
+    "padded_min": -3.8450000000000006,
+    "padded_max": 80.745
+  },
+  "LEDSS_room_air_temperature_sensor2-degrees_celsius": {
+    "min": 0.0,
+    "max": 31.674980408503547,
+    "unit": "degrees_celsius",
+    "padded_min": -1.5837490204251774,
+    "padded_max": 33.258729428928724
+  },
+  "LEDSS_room_air_temperature_sensor3-degrees_celsius": {
+    "min": 0.0,
+    "max": 32.254286666666665,
+    "unit": "degrees_celsius",
+    "padded_min": -1.6127143333333334,
+    "padded_max": 33.867001
+  },
+  "LEDSS_room_air_temperature_sensor4-degrees_celsius": {
+    "min": 0.0,
+    "max": 33.215,
+    "unit": "degrees_celsius",
+    "padded_min": -1.6607500000000002,
+    "padded_max": 34.875750000000004
+  },
+  "LEDSS_room_air_temperature_sensor5-degrees_celsius": {
+    "min": 0.0,
+    "max": 33.279,
+    "unit": "degrees_celsius",
+    "padded_min": -1.6639500000000003,
+    "padded_max": 34.94295
+  },
+  "LEDSS_room_humidity_sensor1-percent": {
+    "min": 0.0,
+    "max": 73.81363870967742,
+    "unit": "percent",
+    "padded_min": -3.6906819354838714,
+    "padded_max": 77.50432064516129
+  },
+  "LEDSS_room_humidity_sensor2-percent": {
+    "min": 0.0,
+    "max": 73.33323032069971,
+    "unit": "percent",
+    "padded_min": -3.666661516034986,
+    "padded_max": 76.9998918367347
+  },
+  "LEDSS_room_humidity_sensor3-percent": {
+    "min": 0.0,
+    "max": 74.50545161290322,
+    "unit": "percent",
+    "padded_min": -3.7252725806451608,
+    "padded_max": 78.23072419354838
+  },
+  "LEDSS_room_humidity_sensor4-percent": {
+    "min": 0.0,
+    "max": 76.03630403225806,
+    "unit": "percent",
+    "padded_min": -3.801815201612903,
+    "padded_max": 79.83811923387096
+  },
+  "LEDSS_room_humidity_sensor5-percent": {
+    "min": 0.0,
+    "max": 75.48343768236765,
+    "unit": "percent",
+    "padded_min": -3.774171884118383,
+    "padded_max": 79.25760956648604
+  },
+  "Weather Station_air_temperature-degrees_celsius": {
+    "min": 12.092836879432623,
+    "max": 32.79266666666667,
+    "unit": "degrees_celsius",
+    "padded_min": 11.05784539007092,
+    "padded_max": 33.82765815602837
+  },
+  "Weather Station_humidity-percent": {
+    "min": 37.758833333333335,
+    "max": 74.49612293144209,
+    "unit": "percent",
+    "padded_min": 35.9219688534279,
+    "padded_max": 76.33298741134753
+  },
+  "Weather Station_pressure-millibars": {
+    "min": 949.4593291666667,
+    "max": 965.1306666666666,
+    "unit": "millibars",
+    "padded_min": 948.6757622916667,
+    "padded_max": 965.9142335416666
+  },
+  "Weather Station_light_level_intensity-lux": {
+    "min": 0.15,
+    "max": 11743.209,
+    "unit": "lux",
+    "padded_min": -587.00295,
+    "padded_max": 12330.36195
+  },
+  "Weather Station_minimum_wind_speed-meters_per_second": {
+    "min": 0.0,
+    "max": 270.0,
+    "unit": "meters_per_second",
+    "padded_min": -13.5,
+    "padded_max": 283.5
+  },
+  "Weather Station_maximum_wind_speed-meters_per_second": {
+    "min": 0.0,
+    "max": 270.0,
+    "unit": "meters_per_second",
+    "padded_min": -13.5,
+    "padded_max": 283.5
+  },
+  "Weather Station_average_wind_direction-degrees": {
+    "min": 0.0,
+    "max": 270.0,
+    "unit": "degrees",
+    "padded_min": -13.5,
+    "padded_max": 283.5
+  },
+  "Weather Station_average_wind_speed-meters_per_second": {
+    "min": 0.0,
+    "max": 0.34833333333333333,
+    "unit": "meters_per_second",
+    "padded_min": -0.017416666666666667,
+    "padded_max": 0.36575
+  },
+  "PVPM_maximum_power-watts": {
+    "min": -0.004,
+    "max": 1700.6162206072054,
+    "unit": "watts",
+    "padded_min": -85.03501103036028,
+    "padded_max": 1785.6472316375657
+  },
+  "PVPM_effective_irradiance-watts_per_sqm": {
+    "min": 0.0,
+    "max": 1373.7766591666666,
+    "unit": "watts_per_sqm",
+    "padded_min": -68.68883295833334,
+    "padded_max": 1442.4654921249999
+  },
+  "Weather Station_globe_temperature-degrees_celsius": {
+    "min": 12.21,
+    "max": 34.31178571428571,
+    "unit": "degrees_celsius",
+    "padded_min": 11.104910714285715,
+    "padded_max": 35.416875
+  }
+}

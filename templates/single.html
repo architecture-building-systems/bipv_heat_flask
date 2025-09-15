@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+
+{% block title %}Single Experiment - BIPV Heat Dashboard{% endblock %}
+
+{% block content %}
+<!-- Top section - 30% height, 3 columns -->
+<div class="row mb-3 top-section">
+    <!-- Column 1: Filter Controls -->
+    <div class="col-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h4>Experiment Filter</h4>
+                
+                <!-- Filter Controls -->
+                <div class="mb-3">
+                    <div class="radio-group" id="G-radio-group">
+                        <label class="form-label radio-group-label">G - Irradiance (W/m²):</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="G-filter" id="G-all" value="all" checked>
+                            <label class="form-check-label" for="G-all">All</label>
+                        </div>
+                        <!-- Dynamic radio buttons will be added here -->
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="radio-group" id="T-radio-group">
+                        <label class="form-label radio-group-label">T - Temperature (°C):</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="T-filter" id="T-all" value="all" checked>
+                            <label class="form-check-label" for="T-all">All</label>
+                        </div>
+                        <!-- Dynamic radio buttons will be added here -->
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="radio-group" id="A-radio-group">
+                        <label class="form-label radio-group-label">A - Azimuth (°):</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="A-filter" id="A-all" value="all" checked>
+                            <label class="form-check-label" for="A-all">All</label>
+                        </div>
+                        <!-- Dynamic radio buttons will be added here -->
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="radio-group" id="Ti-radio-group">
+                        <label class="form-label radio-group-label">Ti - Elevation (°):</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="Ti-filter" id="Ti-all" value="all" checked>
+                            <label class="form-check-label" for="Ti-all">All</label>
+                        </div>
+                        <!-- Dynamic radio buttons will be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Column 2: Available Options -->
+    <div class="col-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h4>Available Options</h4>
+                
+                <!-- Filtered Results -->
+                <label for="filtered-experiments" class="form-label">Matching Experiments:</label>
+                <select id="filtered-experiments" class="form-select mb-3" size="6"></select>
+                <button id="download-button" class="btn btn-primary w-100" disabled>Download Raw Data</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Column 3: Experiment Information -->
+    <div class="col-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h4>Experiment Information</h4>
+                <div id="file-status" class="mb-2"></div>
+                <div id="experiment-details"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom section - 80% height -->
+<div class="row bottom-section">
+    <!-- Left side - Plot area (70%) -->
+    <div class="col-9">
+        <div class="card h-100">
+            <div class="card-body">
+                <div id="unit-warning" class="text-danger fw-bold mb-2"></div>
+                <div id="timeseries-plot" class="plot-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right side - Controls and Legend (30%) -->
+    <div class="col-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h4>Series Selection</h4>
+                <label for="series-dropdown" class="form-label">Select series (multiple allowed):</label>
+                <select id="series-dropdown" class="form-select" multiple></select>
+                <hr>
+                <h4>Legend</h4>
+                <div id="custom-legend"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentExperiment = null;
+let currentSeries = [];
+let allExperiments = [];
+let filterRanges = {};
+
+// Default series - air temperature from comfort cube
+const DEFAULT_SERIES = 'Comfort Cube_standard_effective_temperature-degrees_celsius';
+
+// Local storage key for persisting series selection
+const SERIES_STORAGE_KEY = 'bipv_selected_series';
+
+// Helper functions for localStorage
+function saveSelectedSeries(seriesArray) {
+    try {
+        localStorage.setItem(SERIES_STORAGE_KEY, JSON.stringify(seriesArray));
+    } catch (e) {
+        console.warn('Failed to save series selection to localStorage:', e);
+    }
+}
+
+function getSavedSeries() {
+    try {
+        const saved = localStorage.getItem(SERIES_STORAGE_KEY);
+        return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+        console.warn('Failed to load series selection from localStorage:', e);
+        return null;
+    }
+}
+
+// Load experiments and setup filters on page load
+$(document).ready(function() {
+    loadExperimentCharacteristics();
+});
+
+function loadExperimentCharacteristics() {
+    $.get('/api/experiment-characteristics', function(data) {
+        allExperiments = data.experiments;
+        filterRanges = data.ranges;
+        
+        // Setup radio buttons with unique values
+        setupRadioButtons();
+        
+        // Initial filter
+        filterExperiments();
+    });
+}
+
+function setupRadioButtons() {
+    const params = ['G', 'T', 'A', 'Ti'];
+    
+    params.forEach(param => {
+        const uniqueValues = filterRanges[param].values; // Use the unique values from the API
+        const radioGroup = document.getElementById(`${param}-radio-group`);
+        
+        // Add radio buttons for each unique value
+        uniqueValues.forEach(value => {
+            const radioDiv = document.createElement('div');
+            radioDiv.className = 'form-check form-check-inline';
+            
+            const radioInput = document.createElement('input');
+            radioInput.className = 'form-check-input';
+            radioInput.type = 'radio';
+            radioInput.name = `${param}-filter`;
+            radioInput.id = `${param}-${value}`;
+            radioInput.value = value;
+            
+            const radioLabel = document.createElement('label');
+            radioLabel.className = 'form-check-label';
+            radioLabel.setAttribute('for', `${param}-${value}`);
+            radioLabel.textContent = value;
+            
+            radioDiv.appendChild(radioInput);
+            radioDiv.appendChild(radioLabel);
+            radioGroup.appendChild(radioDiv);
+            
+            // Add event listener
+            radioInput.addEventListener('change', filterExperiments);
+        });
+    });
+    
+    // Add event listeners to "All" radio buttons
+    ['G', 'T', 'A', 'Ti'].forEach(param => {
+        document.getElementById(`${param}-all`).addEventListener('change', filterExperiments);
+    });
+}
+
+function getSelectedFilters() {
+    const filters = {};
+    
+    ['G', 'T', 'A', 'Ti'].forEach(param => {
+        const checkedRadio = document.querySelector(`input[name="${param}-filter"]:checked`);
+        if (checkedRadio && checkedRadio.value !== 'all') {
+            filters[param] = parseInt(checkedRadio.value);
+        } else {
+            filters[param] = 'all'; // No filter applied
+        }
+    });
+    
+    return filters;
+}
+
+function filterExperiments() {
+    const filters = getSelectedFilters();
+    
+    const filteredExperiments = allExperiments.filter(exp => {
+        const chars = exp.characteristics;
+        return (filters.G === 'all' || chars.G === filters.G) &&
+               (filters.T === 'all' || chars.T === filters.T) &&
+               (filters.A === 'all' || chars.A === filters.A) &&
+               (filters.Ti === 'all' || chars.Ti === filters.Ti);
+    });
+    
+    // Update filtered experiments dropdown
+    const dropdown = $('#filtered-experiments');
+    dropdown.empty();
+    
+    if (filteredExperiments.length === 0) {
+        dropdown.append('<option disabled>No experiments match filters</option>');
+        $('#download-button').prop('disabled', true);
+    } else {
+        filteredExperiments.forEach(exp => {
+            const chars = exp.characteristics;
+            const label = `${exp.code} (G:${chars.G}, T:${chars.T}, A:${chars.A}, Ti:${chars.Ti})`;
+            dropdown.append($('<option>', {
+                value: exp.code,
+                text: label
+            }));
+        });
+        
+        // Auto-select first experiment if none selected
+        if (!currentExperiment || !filteredExperiments.find(e => e.code === currentExperiment)) {
+            dropdown.val(filteredExperiments[0].code);
+            selectExperiment(filteredExperiments[0].code);
+        }
+        $('#download-button').prop('disabled', false);
+    }
+}
+
+// Handle experiment selection from filtered list
+$('#filtered-experiments').change(function() {
+    const experimentCode = $(this).val();
+    selectExperiment(experimentCode);
+});
+
+function selectExperiment(experimentCode) {
+    if (!experimentCode) return;
+    
+    currentExperiment = experimentCode;
+    
+    $.get(`/api/experiment/${experimentCode}`, function(data) {
+        if (data.error) {
+            $('#file-status').html(`<div class="alert alert-danger">${data.error}</div>`);
+            return;
+        }
+        
+        // Update status
+        // $('#file-status').html(`<div class="alert alert-success">${data.status}</div>`);
+        
+        // Update experiment details
+        const details = data.experiment_details;
+        let detailsHtml = '';
+        
+        if (details.status) {
+            detailsHtml = `<div class="alert alert-warning">${details.status}</div>`;
+        } else {
+            detailsHtml = `
+                <p><strong>Date:</strong> ${details.date}</p>
+                <p><strong>Monitor:</strong> ${details.monitor}</p>
+                <p><strong>IR:</strong> ${details.ir}</p>
+                <p><strong>Warm White:</strong> ${details.ww}</p>
+                <p><strong>Cold White:</strong> ${details.cw}</p>
+                <p><strong>Notes:</strong> <em>${details.notes}</em></p>
+            `;
+        }
+        $('#experiment-details').html(detailsHtml);
+        
+        // Update series dropdown
+        const seriesDropdown = $('#series-dropdown');
+        seriesDropdown.empty();
+        
+        data.series_options.forEach(function(series) {
+            seriesDropdown.append($('<option>', {
+                value: series.value,
+                text: series.label
+            }));
+        });
+        
+        // Smart series selection logic
+        selectBestSeries(data.series_options);
+        updatePlot();
+    });
+}
+
+function selectBestSeries(availableSeries) {
+    const seriesDropdown = $('#series-dropdown');
+    const availableValues = availableSeries.map(s => s.value);
+    
+    // Get previously saved series
+    const savedSeries = getSavedSeries();
+    
+    let seriesToSelect = [];
+    
+    if (savedSeries && savedSeries.length > 0) {
+        // Try to restore saved series - keep only those available in this experiment
+        seriesToSelect = savedSeries.filter(series => availableValues.includes(series));
+        
+        if (seriesToSelect.length === 0) {
+            console.log('Previously selected series not available in this experiment, falling back to default');
+        }
+    }
+    
+    // If no saved series could be restored, use default
+    if (seriesToSelect.length === 0) {
+        if (availableValues.includes(DEFAULT_SERIES)) {
+            seriesToSelect = [DEFAULT_SERIES];
+            console.log('Using default series:', DEFAULT_SERIES);
+        } else {
+            // If default not available, use first available series
+            seriesToSelect = [availableSeries[0]?.value];
+            console.log('Default series not available, using first available:', seriesToSelect[0]);
+        }
+    }
+    
+    // Update dropdown and current selection
+    seriesDropdown.val(seriesToSelect);
+    currentSeries = seriesToSelect.filter(s => s); // Remove any null/undefined values
+    
+    console.log('Selected series for experiment', currentExperiment, ':', currentSeries);
+}
+
+// Handle series selection
+$('#series-dropdown').change(function() {
+    currentSeries = $(this).val() || [];
+    
+    // Save the selection to localStorage
+    saveSelectedSeries(currentSeries);
+    
+    updatePlot();
+});
+
+// Handle download button
+$('#download-button').click(function() {
+    if (!currentExperiment) return;
+    window.location.href = `/download/${currentExperiment}`;
+});
+
+function updatePlot() {
+    if (!currentExperiment || !currentSeries.length) return;
+    
+    const queryParams = new URLSearchParams();
+    queryParams.append('experiment', currentExperiment);
+    currentSeries.forEach(series => queryParams.append('series[]', series));
+    
+    $.get(`/api/plot?${queryParams.toString()}`, function(data) {
+        if (data.error) {
+            $('#unit-warning').text(data.error);
+            return;
+        }
+        
+        $('#unit-warning').text(data.warning || '');
+        Plotly.newPlot('timeseries-plot', data.plot.data, data.plot.layout);
+        
+        // Update custom legend
+        updateCustomLegend(data.legend || []);
+    });
+}
+
+function updateCustomLegend(legendData) {
+    const legendContainer = $('#custom-legend');
+    legendContainer.empty();
+    
+    if (legendData.length === 0) {
+        legendContainer.html('<p class="text-muted small">No series selected</p>');
+        return;
+    }
+    
+    legendData.forEach((item, index) => {
+        const color = getTraceColor(index);
+        const lineStyle = item.style === 'dashed' ? 'dashed' : 'solid';
+        
+        const legendItem = $(`
+            <div class="legend-item mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="legend-line me-2" style="
+                        width: 20px; 
+                        height: 2px; 
+                        background-color: ${color}; 
+                        border: ${lineStyle === 'dashed' ? '1px dashed ' + color : 'none'};
+                        background: ${lineStyle === 'dashed' ? 'none' : color};
+                    "></div>
+                    <div class="legend-text">
+                        <div class="legend-name" style="font-size: 11px; font-weight: 600;">${item.name}</div>
+                        <div class="legend-unit text-muted" style="font-size: 10px;">${item.unit}</div>
+                    </div>
+                </div>
+            </div>
+        `);
+        
+        legendContainer.append(legendItem);
+    });
+}
+
+function getTraceColor(index) {
+    // Plotly default color sequence
+    const colors = [
+        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+    ];
+    return colors[index % colors.length];
+}
+</script>
+{% endblock %}
