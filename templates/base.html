@@ -16,7 +16,10 @@
         <!-- Navigation Menu -->
         <div class="header">
             <div class="header-content"> 
-                <h1>BIPV Heat Dashboard</h1>
+                <div class="title-section">
+                    <h1>BIPV Heat Dashboard</h1>
+                    <button class="about-btn-header" id="about-btn" title="Explain the Project">About</button>
+                </div>
                 <nav class="nav">
                     <ul class="nav-list">
                         <li class="nav-item">
@@ -40,8 +43,126 @@
         {% block content %}{% endblock %}
     </div>
 
+    <!-- About Modal -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>About the BIPV Heat Project</h2>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="about-section">
+                    <div class="about-image" style="text-align:center; margin-bottom: 15px;">
+                        <img src="{{ url_for('static', filename='images/concept_drawing.png') }}" alt="BIPV Heat Concept Drawing" style="width:75%; height:auto; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.07); margin-bottom:8px;">
+                    </div>
+                    <h3>Project Overview</h3>
+                    <p>BIPV Heat began with a whiteboard sketch depicitng the LED solar simulator being used to illuminate a BIPV facade in a climate chamber. The impact of this activity was intended to first examine the thermal dynamics of a BIPV facade and its immediate surrounding area. It has grown into a larger study and conceptual framework for designing and evaulating BIPV facade systems.</p>
+                        
+                    <p> This dashboard contains the results of measurement campaigns fo BIPV facades and typical facade systems. Read through to understand in detail what data is available for interaction and most importantly about the individuals that have supported this project.</p>
+                    
+                    <h3>Research Focus</h3>
+                    <p>Our research centers on understanding how BIPV systems generate and manage heat, with particular attention to:</p>
+                    <ul>
+                        <li><strong>Temperature Distribution:</strong> Monitoring heat patterns across BIPV surfaces</li>
+                        <li><strong>Environmental Impact:</strong> Analyzing how weather conditions affect BIPV thermal performance</li>
+                        <li><strong>System Efficiency:</strong> Optimizing BIPV performance through thermal management</li>
+                        <li><strong>Building Integration:</strong> Understanding thermal interactions between BIPV systems and building envelopes</li>
+                    </ul>
+                    
+                    <h3>Data Collection System</h3>
+                    <p>This dashboard displays real-time and historical data from our comprehensive monitoring setup:</p>
+                    <ul>
+                        <li><strong>Nano Cube Sensors:</strong> High-precision temperature measurements</li>
+                        <li><strong>Comfort Cube Sensors:</strong> Environmental comfort monitoring</li>
+                        <li><strong>SoLo Thermal Sensors:</strong> Distributed temperature sensing</li>
+                        <li><strong>PVPM Systems:</strong> Photovoltaic performance monitoring</li>
+                        <li><strong>cDAQ Acquisition:</strong> Multi-channel data collection</li>
+                        <li><strong>LEDSS Light Sensors:</strong> Solar irradiance and spectrum analysis</li>
+                        <li><strong>Weather Station:</strong> Comprehensive environmental data</li>
+                    </ul>
+                    
+                    <h3>Experimental Facilities</h3>
+                    <p>Our research utilizes state-of-the-art facilities including:</p>
+                    <ul>
+                        <li><strong>Climate Chamber:</strong> Controlled environmental testing</li>
+                        <li><strong>LED Solar Simulator:</strong> Precise irradiance control for experiments</li>
+                        <li><strong>Data Acquisition Systems:</strong> Real-time monitoring and logging</li>
+                    </ul>
+                    
+                    <h3>Dashboard Features</h3>
+                    <p>This interactive dashboard provides:</p>
+                    <ul>
+                        <li><strong>Experiment Browser:</strong> Explore available experiments with detailed metadata</li>
+                        <li><strong>Time Series Visualization:</strong> Interactive plots with phase annotations</li>
+                        <li><strong>Multi-Parameter Analysis:</strong> Compare different sensors and conditions</li>
+                        <li><strong>Data Export:</strong> Download experimental data for further analysis</li>
+                        <li><strong>Real-Time Updates:</strong> Live data from ongoing experiments</li>
+                    </ul>
+                    
+                    <h3>Research Impact</h3>
+                    <p>This research contributes to the advancement of sustainable building technologies by providing crucial insights into BIPV thermal behavior, ultimately supporting the development of more efficient and effective building-integrated renewable energy systems.</p>
+                    
+                    <div class="research-partners">
+                        <h4>Research Partners & Support</h4>
+                        <p>This project is conducted in collaboration with industry partners and supported by the ETH Zurich research infrastructure.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modal JavaScript -->
+    <script>
+        $(document).ready(function() {
+            const modal = $('#about-modal');
+            const aboutBtn = $('#about-btn');
+            const closeBtn = $('.modal-close');
+            
+            // Check if this is the first visit
+            const hasVisitedBefore = localStorage.getItem('bipv-dashboard-visited');
+            
+            // Show modal on first visit
+            if (!hasVisitedBefore) {
+                setTimeout(function() {
+                    modal.show();
+                    localStorage.setItem('bipv-dashboard-visited', 'true');
+                }, 1000); // Show after 1 second delay
+            }
+            
+            // Show modal when About button is clicked
+            aboutBtn.click(function() {
+                modal.show();
+            });
+            
+            // Close modal when X is clicked
+            closeBtn.click(function() {
+                modal.hide();
+            });
+            
+            // Close modal when clicking outside of it
+            modal.click(function(event) {
+                if (event.target === modal[0]) {
+                    modal.hide();
+                }
+            });
+            
+            // Close modal with Escape key
+            $(document).keydown(function(event) {
+                if (event.key === 'Escape' && modal.is(':visible')) {
+                    modal.hide();
+                }
+            });
+            
+            // Prevent modal body clicks from closing the modal
+            $('.modal-content').click(function(event) {
+                event.stopPropagation();
+            });
+        });
+    </script>
+    
     {% block scripts %}{% endblock %}
 </body>
 </html>
