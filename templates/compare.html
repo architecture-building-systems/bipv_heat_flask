@@ -3,13 +3,133 @@
 {% block title %}Compare Experiments - BIPV Heat Dashboard{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body text-center">
-                <h2 class="text-muted">Compare Page</h2>
-                <p class="lead text-muted">This page will allow comparison of multiple experiments.</p>
-                <p class="text-muted">Coming soon...</p>
+<!-- Top section - 30% height, 3 columns -->
+<div class="row mb-3 top-section">
+    <!-- Column 1: Filter Controls -->
+    <div class="col-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h4>Experiment Filter</h4>
+                
+                <!-- Filter Controls -->
+                <div class="mb-3">
+                    <div class="radio-group" id="G-radio-group">
+                        <label class="form-label radio-group-label">G - Irradiance (W/m²):</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="G-filter" id="G-all" value="all" checked>
+                            <label class="form-check-label" for="G-all">All</label>
+                        </div>
+                        <!-- Dynamic radio buttons will be added here -->
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="radio-group" id="T-radio-group">
+                        <label class="form-label radio-group-label">T - Temperature (°C):</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="T-filter" id="T-all" value="all" checked>
+                            <label class="form-check-label" for="T-all">All</label>
+                        </div>
+                        <!-- Dynamic radio buttons will be added here -->
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="radio-group" id="A-radio-group">
+                        <label class="form-label radio-group-label">A - Azimuth (°):</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="A-filter" id="A-all" value="all" checked>
+                            <label class="form-check-label" for="A-all">All</label>
+                        </div>
+                        <!-- Dynamic radio buttons will be added here -->
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="radio-group" id="Ti-radio-group">
+                        <label class="form-label radio-group-label">Ti - Tilt (°):</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="Ti-filter" id="Ti-all" value="all" checked>
+                            <label class="form-check-label" for="Ti-all">All</label>
+                        </div>
+                        <!-- Dynamic radio buttons will be added here -->
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="radio-group" id="Type-radio-group">
+                        <label class="form-label radio-group-label">Type:</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="Type-filter" id="Type-all" value="all" checked>
+                            <label class="form-check-label" for="Type-all">All</label>
+                        </div>
+                        <!-- Dynamic radio buttons will be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Column 2: Available Options -->
+    <div class="col-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h4>Available Options</h4>
+                
+                <!-- Filtered Results -->
+                <label for="filtered-experiments" class="form-label">Matching Experiments:</label>
+                <select id="filtered-experiments" class="form-select mb-3" size="8" multiple></select>
+                <small class="text-muted">Hold Ctrl/Cmd to select multiple experiments</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Column 3: Experiment Information Table -->
+    <div class="col-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h4>Experiment Details</h4>
+                <div id="experiment-table-container">
+                    <p class="text-muted">Select experiments to view details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom section - 80% height -->
+<div class="row bottom-section">
+    <!-- Left side - Plot area (70%) -->
+    <div class="col-9">
+        <div class="card h-100">
+            <div class="card-body">
+                <div id="unit-warning" class="text-danger fw-bold mb-2"></div>
+                <div id="timeseries-plot" class="plot-container">
+                    <div class="text-center text-muted">
+                        <h5>Comparison Plot</h5>
+                        <p>Select experiments and series to generate comparison plot</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right side - Controls and Legend (30%) -->
+    <div class="col-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h4>Series Selection</h4>
+                <label for="series-dropdown" class="form-label">Select series (multiple allowed):</label>
+                <select id="series-dropdown" class="form-select" multiple></select>
+                <hr>
+                <h4>Legend</h4>
+                <div id="custom-legend">
+                    <p class="text-muted small">No series selected</p>
+                </div>
+                <hr>
+                <button id="download-plot-data" class="btn btn-sm btn-outline-primary w-100" disabled>
+                    <i class="fas fa-download me-1"></i>Download Plot Data
+                </button>
             </div>
         </div>
     </div>
@@ -18,7 +138,421 @@
 
 {% block scripts %}
 <script>
-// Compare page specific JavaScript will go here
-console.log('Compare page loaded');
+let selectedExperiments = [];
+let currentSeries = [];
+let allExperiments = [];
+let filterRanges = {};
+let experimentDetails = {};
+
+// Default series - air temperature from comfort cube
+const DEFAULT_SERIES = 'Comfort Cube_standard_effective_temperature-degrees_celsius';
+
+// Local storage key for persisting series selection
+const SERIES_STORAGE_KEY = 'bipv_compare_selected_series';
+
+// Helper functions for localStorage
+function saveSelectedSeries(seriesArray) {
+    try {
+        localStorage.setItem(SERIES_STORAGE_KEY, JSON.stringify(seriesArray));
+    } catch (e) {
+        console.warn('Failed to save series selection to localStorage:', e);
+    }
+}
+
+function getSavedSeries() {
+    try {
+        const saved = localStorage.getItem(SERIES_STORAGE_KEY);
+        return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+        console.warn('Failed to load series selection from localStorage:', e);
+        return null;
+    }
+}
+
+// Load experiments and setup filters on page load
+$(document).ready(function() {
+    loadExperimentCharacteristics();
+});
+
+function loadExperimentCharacteristics() {
+    $.get('/api/experiment-characteristics', function(data) {
+        allExperiments = data.experiments;
+        filterRanges = data.ranges;
+        
+        // Setup radio buttons with unique values
+        setupRadioButtons();
+        
+        // Initial filter
+        filterExperiments();
+    });
+}
+
+function setupRadioButtons() {
+    const params = ['G', 'T', 'A', 'Ti', 'Type'];
+    
+    params.forEach(param => {
+        const uniqueValues = filterRanges[param].values; // Use the unique values from the API
+        const radioGroup = document.getElementById(`${param}-radio-group`);
+        
+        // Add radio buttons for each unique value
+        uniqueValues.forEach(value => {
+            const radioDiv = document.createElement('div');
+            radioDiv.className = 'form-check form-check-inline';
+            
+            const radioInput = document.createElement('input');
+            radioInput.className = 'form-check-input';
+            radioInput.type = 'radio';
+            radioInput.name = `${param}-filter`;
+            radioInput.id = `${param}-${value}`;
+            radioInput.value = value;
+            
+            const radioLabel = document.createElement('label');
+            radioLabel.className = 'form-check-label';
+            radioLabel.setAttribute('for', `${param}-${value}`);
+            radioLabel.textContent = value;
+            
+            radioDiv.appendChild(radioInput);
+            radioDiv.appendChild(radioLabel);
+            radioGroup.appendChild(radioDiv);
+            
+            // Add event listener
+            radioInput.addEventListener('change', filterExperiments);
+        });
+    });
+    
+    // Add event listeners to "All" radio buttons
+    ['G', 'T', 'A', 'Ti', 'Type'].forEach(param => {
+        document.getElementById(`${param}-all`).addEventListener('change', filterExperiments);
+    });
+}
+
+function getSelectedFilters() {
+    const filters = {};
+    
+    ['G', 'T', 'A', 'Ti'].forEach(param => {
+        const checkedRadio = document.querySelector(`input[name="${param}-filter"]:checked`);
+        if (checkedRadio && checkedRadio.value !== 'all') {
+            filters[param] = parseInt(checkedRadio.value);
+        } else {
+            filters[param] = 'all'; // No filter applied
+        }
+    });
+    
+    // Handle Type parameter separately (it's a string, not numeric)
+    const typeRadio = document.querySelector(`input[name="Type-filter"]:checked`);
+    if (typeRadio && typeRadio.value !== 'all') {
+        filters['Type'] = typeRadio.value; // Keep as string
+    } else {
+        filters['Type'] = 'all'; // No filter applied
+    }
+    
+    return filters;
+}
+
+function filterExperiments() {
+    const filters = getSelectedFilters();
+    
+    const filteredExperiments = allExperiments.filter(exp => {
+        const chars = exp.characteristics;
+        return (filters.G === 'all' || chars.G === filters.G) &&
+               (filters.T === 'all' || chars.T === filters.T) &&
+               (filters.A === 'all' || chars.A === filters.A) &&
+               (filters.Ti === 'all' || chars.Ti === filters.Ti) &&
+               (filters.Type === 'all' || chars.Type === filters.Type);
+    });
+    
+    // Update filtered experiments dropdown
+    const dropdown = $('#filtered-experiments');
+    dropdown.empty();
+    
+    if (filteredExperiments.length === 0) {
+        dropdown.append('<option disabled>No experiments match filters</option>');
+    } else {
+        filteredExperiments.forEach(exp => {
+            const chars = exp.characteristics;
+            const label = `${exp.code} (G:${chars.G}, T:${chars.T}, A:${chars.A}, Ti:${chars.Ti})`;
+            dropdown.append($('<option>', {
+                value: exp.code,
+                text: label
+            }));
+        });
+    }
+}
+
+// Handle experiment selection from filtered list
+$('#filtered-experiments').change(function() {
+    const selectedCodes = $(this).val() || [];
+    selectedExperiments = selectedCodes;
+    updateExperimentTable();
+    updateSeriesDropdown();
+});
+
+function updateExperimentTable() {
+    const container = $('#experiment-table-container');
+    
+    if (selectedExperiments.length === 0) {
+        container.html('<p class="text-muted">Select experiments to view details</p>');
+        return;
+    }
+    
+    // Load details for selected experiments
+    const promises = selectedExperiments.map(code => {
+        return $.get(`/api/experiment/${code}`).then(data => {
+            experimentDetails[code] = data;
+            return { code, data };
+        });
+    });
+    
+    Promise.all(promises).then(results => {
+        let tableHtml = '<div class="table-responsive"><table class="table table-sm table-striped">';
+        tableHtml += '<thead><tr><th>Idx</th><th>Date</th><th>IR</th><th>WW</th><th>CW</th><th>Mean Surface (˚C)</th><th>Mean Room (˚C)</th></tr></thead><tbody>';
+        
+        results.forEach(({ code, data }) => {
+            const details = data.experiment_details;
+            const chars = allExperiments.find(exp => exp.code === code)?.characteristics;
+            
+            // Extract idx number from experiment code (e.g., "idx-024" -> "024")
+            const idxMatch = code.match(/idx-(\d+)/);
+            const idxNumber = idxMatch ? idxMatch[1].padStart(3, '0') : code;
+            
+            tableHtml += '<tr>';
+            tableHtml += `<td><small>${idxNumber}</small></td>`;
+            tableHtml += `<td><small>${details.date || 'N/A'}</small></td>`;
+            tableHtml += `<td><small>${details.ir || 'N/A'}</small></td>`;
+            tableHtml += `<td><small>${details.ww || 'N/A'}</small></td>`;
+            tableHtml += `<td><small>${details.cw || 'N/A'}</small></td>`;
+            tableHtml += `<td><small>Calculating...</small></td>`; // Placeholder for surface temp
+            tableHtml += `<td><small>Calculating...</small></td>`; // Placeholder for room temp
+            tableHtml += '</tr>';
+        });
+        
+        tableHtml += '</tbody></table></div>';
+        container.html(tableHtml);
+        
+        // TODO: Calculate mean temperatures for each experiment
+        calculateMeanTemperatures(results);
+    });
+}
+
+function calculateMeanTemperatures(results) {
+    // Calculate temperatures for each experiment
+    const temperaturePromises = results.map(({ code }) => {
+        return $.get(`/api/experiment/${code}/temperatures`)
+            .then(data => ({ code, data }))
+            .catch(error => ({ code, error: error.responseJSON?.error || 'Unknown error' }));
+    });
+    
+    Promise.all(temperaturePromises).then(temperatureResults => {
+        // Update the table with calculated temperatures
+        updateTemperatureTable(temperatureResults);
+    });
+}
+
+function updateTemperatureTable(temperatureResults) {
+    const container = $('#experiment-table-container');
+    const currentTable = container.find('table');
+    
+    if (currentTable.length === 0) return;
+    
+    // Update each row with temperature data
+    temperatureResults.forEach(({ code, data, error }) => {
+        const row = currentTable.find(`tr:has(td:contains("${code.match(/idx-(\d+)/)?.[1]?.padStart(3, '0') || code}"))`);
+        
+        if (row.length > 0) {
+            const surfaceTempCell = row.find('td').eq(5); // Surface Temp column
+            const airTempCell = row.find('td').eq(6);     // Room Temp column
+            
+            if (error) {
+                surfaceTempCell.html('<small class="text-danger">Error</small>');
+                airTempCell.html('<small class="text-danger">Error</small>');
+            } else {
+                const surfaceTemp = data.surface_temp !== null ? `${data.surface_temp.toFixed(1)}°C` : 'N/A';
+                const airTemp = data.air_temp !== null ? `${data.air_temp.toFixed(1)}°C` : 'N/A';
+                
+                surfaceTempCell.html(`<small>${surfaceTemp}</small>`);
+                airTempCell.html(`<small>${airTemp}</small>`);
+            }
+        }
+    });
+}
+
+function updateSeriesDropdown() {
+    if (selectedExperiments.length === 0) {
+        $('#series-dropdown').empty();
+        return;
+    }
+    
+    // Get series options from first selected experiment
+    const firstExperiment = selectedExperiments[0];
+    if (experimentDetails[firstExperiment]) {
+        const seriesOptions = experimentDetails[firstExperiment].series_options;
+        const dropdown = $('#series-dropdown');
+        dropdown.empty();
+        
+        seriesOptions.forEach(function(series) {
+            dropdown.append($('<option>', {
+                value: series.value,
+                text: series.label
+            }));
+        });
+        
+        // Smart series selection logic
+        selectBestSeries(seriesOptions);
+    }
+}
+
+function selectBestSeries(availableSeries) {
+    const seriesDropdown = $('#series-dropdown');
+    const availableValues = availableSeries.map(s => s.value);
+    
+    // Get previously saved series
+    const savedSeries = getSavedSeries();
+    
+    let seriesToSelect = [];
+    
+    if (savedSeries && savedSeries.length > 0) {
+        // Try to restore saved series - keep only those available in this experiment
+        seriesToSelect = savedSeries.filter(series => availableValues.includes(series));
+        
+        if (seriesToSelect.length === 0) {
+            console.log('Previously selected series not available in this experiment, falling back to default');
+        }
+    }
+    
+    // If no saved series could be restored, use default
+    if (seriesToSelect.length === 0) {
+        if (availableValues.includes(DEFAULT_SERIES)) {
+            seriesToSelect = [DEFAULT_SERIES];
+            console.log('Using default series:', DEFAULT_SERIES);
+        } else {
+            // If default not available, use first available series
+            seriesToSelect = [availableSeries[0]?.value];
+            console.log('Default series not available, using first available:', seriesToSelect[0]);
+        }
+    }
+    
+    // Update dropdown and current selection
+    seriesDropdown.val(seriesToSelect);
+    currentSeries = seriesToSelect.filter(s => s); // Remove any null/undefined values
+    
+    console.log('Selected series for comparison:', currentSeries);
+}
+
+// Handle series selection
+$('#series-dropdown').change(function() {
+    currentSeries = $(this).val() || [];
+    
+    // Save the selection to localStorage
+    saveSelectedSeries(currentSeries);
+    
+    // TODO: Update comparison plot
+    updateComparisonPlot();
+});
+
+// Handle download plot data button
+$('#download-plot-data').click(function() {
+    if (selectedExperiments.length === 0 || currentSeries.length === 0) return;
+    
+    const queryParams = new URLSearchParams();
+    selectedExperiments.forEach(exp => queryParams.append('experiments[]', exp));
+    currentSeries.forEach(series => queryParams.append('series[]', series));
+    queryParams.append('format', 'csv');
+    
+    window.location.href = `/api/compare-plot-data?${queryParams.toString()}`;
+});
+
+function updateComparisonPlot() {
+    if (selectedExperiments.length === 0 || currentSeries.length === 0) {
+        // Clear the plot area
+        $('#timeseries-plot').html(`
+            <div class="text-center text-muted">
+                <h5>Comparison Plot</h5>
+                <p>Select experiments and series to generate comparison plot</p>
+            </div>
+        `);
+        $('#custom-legend').html('<p class="text-muted small">No series selected</p>');
+        return;
+    }
+    
+    if (currentSeries.length > 2) {
+        $('#unit-warning').text('Maximum 2 series allowed for comparison');
+        return;
+    }
+    
+    const queryParams = new URLSearchParams();
+    selectedExperiments.forEach(exp => queryParams.append('experiments[]', exp));
+    currentSeries.forEach(series => queryParams.append('series[]', series));
+    
+    $.get(`/api/compare-plot?${queryParams.toString()}`, function(data) {
+        if (data.error) {
+            $('#unit-warning').text(data.error);
+            return;
+        }
+        
+        $('#unit-warning').text(data.warning || '');
+        
+        // Clear any placeholder content before plotting
+        $('#timeseries-plot').empty();
+        
+        Plotly.newPlot('timeseries-plot', data.plot.data, data.plot.layout).then(function() {
+            // Ensure plot resizes to fit container
+            Plotly.Plots.resize('timeseries-plot');
+        });
+        
+        // Update custom legend
+        updateCustomLegend(data.legend || []);
+        
+        // Enable download button
+        $('#download-plot-data').prop('disabled', false);
+    }).fail(function(xhr) {
+        const error = xhr.responseJSON?.error || 'Unknown error occurred';
+        $('#unit-warning').text(`Error: ${error}`);
+    });
+}
+
+function updateCustomLegend(legendData) {
+    const legendContainer = $('#custom-legend');
+    legendContainer.empty();
+    
+    if (legendData.length === 0) {
+        legendContainer.html('<p class="text-muted small">No series selected</p>');
+        return;
+    }
+    
+    legendData.forEach((item, index) => {
+        // Use color from the legend data if available, otherwise fall back to default
+        const color = item.color || getTraceColor(index);
+        const lineStyle = item.style === 'dashed' ? 'dashed' : 'solid';
+        
+        const legendItem = $(`
+            <div class="legend-item mb-2">
+                <div class="d-flex align-items-center">
+                    <div class="legend-line me-2" style="
+                        width: 20px; 
+                        height: 2px; 
+                        background-color: ${color}; 
+                        border: ${lineStyle === 'dashed' ? '1px dashed ' + color : 'none'};
+                        background: ${lineStyle === 'dashed' ? 'none' : color};
+                    "></div>
+                    <div class="legend-text">
+                        <div class="legend-name" style="font-size: 11px; font-weight: 600;">${item.name}</div>
+                        <div class="legend-unit text-muted" style="font-size: 10px;">${item.unit}</div>
+                    </div>
+                </div>
+            </div>
+        `);
+        
+        legendContainer.append(legendItem);
+    });
+}
+
+function getTraceColor(index) {
+    // Plotly default color sequence
+    const colors = [
+        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+    ];
+    return colors[index % colors.length];
+}
 </script>
 {% endblock %}

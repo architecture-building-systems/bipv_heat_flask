@@ -4,7 +4,7 @@ import pickle
 import re
 from pathlib import Path
 from datetime import datetime, timedelta
-from flask import Flask, render_template, jsonify, send_file, request, redirect
+from flask import Flask, render_template, jsonify, send_file, request, redirect, make_response
 import pandas as pd
 import plotly
 import json
@@ -31,16 +31,18 @@ def is_special_experiment(experiment_code):
 
 def parse_experiment_characteristics(experiment_code):
     """Parse experiment code to extract G, T, A, Ti values"""
-    # Pattern: idx-XXX_reg_G-[value]_T-[value]_A-[value]_Ti-[value]
-    pattern = r'idx-\d+_reg_G-(\d+)_T-(\d+)_A-(\d+)_Ti-(\d+)'
+    # Pattern: idx-XXX_TYPE_G-[value]_T-[value]_A-[value]_Ti-[value]
+    # Make A and Ti optional for experiments that don't have them
+    pattern = r'idx-\d+_([^_]+)_G-(\d+)_T-(\d+)(?:_A-(\d+))?(?:_Ti-(\d+))?'
     match = re.match(pattern, experiment_code)
     
     if match:
         return {
-            'G': int(match.group(1)),  # Irradiance
-            'T': int(match.group(2)),  # Temperature
-            'A': int(match.group(3)),  # Azimuth
-            'Ti': int(match.group(4))  # Elevation
+            'Type': str(match.group(1)),  # Type (first capture group)
+            'G': int(match.group(2)),     # Irradiance
+            'T': int(match.group(3)),      # Temperature
+            'A': int(match.group(4)) if match.group(4) else 0,      # Azimuth (default 0)
+            'Ti': int(match.group(5)) if match.group(5) else 0      # Elevation (default 0)
         }
     return None
 
@@ -148,6 +150,43 @@ def clear_series_ranges_cache():
     SERIES_RANGES_CACHE = None
     print("Series ranges cache cleared")
 
+def get_paired_colors(n_colors):
+    """
+    Generate colors from matplotlib's 'Paired' colormap (hardcoded values).
+    Returns tuples of (primary_color, secondary_color) for consistent pairing.
+    """
+    # Hardcoded matplotlib Paired colormap colors (12 colors, 6 pairs)
+    # Even indices (0,2,4,6,8,10) are for primary axis
+    # Odd indices (1,3,5,7,9,11) are for secondary axis
+    paired_colors = [
+        '#a6cee3',  # 0 - light blue (primary)
+        '#1f78b4',  # 1 - dark blue (secondary)
+        '#b2df8a',  # 2 - light green (primary)
+        '#33a02c',  # 3 - dark green (secondary)
+        '#fb9a99',  # 4 - light red (primary)
+        '#e31a1c',  # 5 - dark red (secondary)
+        '#fdbf6f',  # 6 - light orange (primary)
+        '#ff7f00',  # 7 - dark orange (secondary)
+        '#cab2d6',  # 8 - light purple (primary)
+        '#6a3d9a',  # 9 - dark purple (secondary)
+        '#ffff99',  # 10 - light yellow (primary)
+        '#b15928'   # 11 - dark brown (secondary)
+    ]
+    
+    colors = []
+    max_pairs = min(n_colors, 6)  # Paired colormap has 6 pairs maximum
+    
+    for i in range(max_pairs):
+        primary_color = paired_colors[i * 2]      # Even index (0,2,4,6,8,10)
+        secondary_color = paired_colors[i * 2 + 1] # Odd index (1,3,5,7,9,11)
+        colors.append((primary_color, secondary_color))
+    
+    # If we need more colors than pairs available, cycle through
+    while len(colors) < n_colors:
+        colors.extend(colors[:min(6, n_colors - len(colors))])
+    
+    return colors[:n_colors]
+
 
 
 @app.route('/')
@@ -222,7 +261,7 @@ def get_experiment_characteristics():
     experiments_with_chars = []
     
     # Collect all characteristics
-    all_G, all_T, all_A, all_Ti = [], [], [], []
+    all_G, all_T, all_A, all_Ti, all_Type = [], [], [], [], []
     
     # Process experiments from log that have feather files
     if experiment_log:
@@ -240,6 +279,7 @@ def get_experiment_characteristics():
                     all_T.append(chars['T'])
                     all_A.append(chars['A'])
                     all_Ti.append(chars['Ti'])
+                    all_Type.append(chars['Type'])
     
     # Process feather files not in log
     feather_files = list_feather_files()
@@ -261,13 +301,15 @@ def get_experiment_characteristics():
             all_T.append(chars['T'])
             all_A.append(chars['A'])
             all_Ti.append(chars['Ti'])
+            all_Type.append(chars['Type'])
     
     # Calculate ranges
     ranges = {
         'G': {'min': min(all_G) if all_G else 0, 'max': max(all_G) if all_G else 1000, 'values': sorted(set(all_G))},
         'T': {'min': min(all_T) if all_T else 0, 'max': max(all_T) if all_T else 30, 'values': sorted(set(all_T))},
         'A': {'min': min(all_A) if all_A else 0, 'max': max(all_A) if all_A else 45, 'values': sorted(set(all_A))},
-        'Ti': {'min': min(all_Ti) if all_Ti else 0, 'max': max(all_Ti) if all_Ti else 72, 'values': sorted(set(all_Ti))}
+        'Ti': {'min': min(all_Ti) if all_Ti else 0, 'max': max(all_Ti) if all_Ti else 72, 'values': sorted(set(all_Ti))},
+        'Type': {'values': sorted(set(all_Type))}  # Type is categorical, no min/max needed
     }
     
     return jsonify({
@@ -384,39 +426,52 @@ def get_plot_data():
         use_secondary = len(units) > 1
         fig = make_subplots(specs=[[{"secondary_y": use_secondary}]])
         
+        # Calculate total number of series for color generation
+        total_series = len(cols)
+        color_pairs = get_paired_colors(total_series)
+        
+        # Track color index across both axes
+        color_index = 0
+        data_line_width = 2
         # Plot first unit on primary y-axis
         for col in unit_map[units[0]]:
+            primary_color, _ = color_pairs[color_index]
             fig.add_trace(
                 go.Scatter(
                     x=df.index, 
                     y=df[col], 
                     mode='lines', 
                     name=str(col),
-                    line=dict(width=1),
+                    line=dict(width=data_line_width, color=primary_color),
                     showlegend=True
                 ),
                 secondary_y=False
             )
+            color_index += 1
         
         # Plot second unit on secondary y-axis with dashed lines
         if use_secondary:
+            # Reset color index to start from beginning for secondary axis
+            color_index = 0
             for col in unit_map[units[1]]:
+                _, secondary_color = color_pairs[color_index]
                 fig.add_trace(
                     go.Scatter(
                         x=df.index, 
                         y=df[col], 
                         mode='lines', 
                         name=str(col),
-                        line=dict(dash='dash', width=1),
+                        line=dict(dash='dash', width=data_line_width, color=secondary_color),
                         showlegend=True
                     ),
                     secondary_y=True
                 )
+                color_index += 1
             
-            fig.update_yaxes(title_text=f"Primary ({units[0]})", secondary_y=False)
-            fig.update_yaxes(title_text=f"Secondary ({units[1]})", secondary_y=True)
+            fig.update_yaxes(title_text=f"Primary ({units[0]})", zeroline=False, showline=False, secondary_y=False)
+            fig.update_yaxes(title_text=f"Secondary ({units[1]})", zeroline=False, showline=False, secondary_y=True)
         else:
-            fig.update_yaxes(title_text=f"Value ({units[0]})", secondary_y=False)
+            fig.update_yaxes(title_text=f"Value ({units[0]})", zeroline=False, showline=False, secondary_y=False)
         
         # Apply standardized y-axis ranges
         series_ranges = load_series_ranges()
@@ -433,7 +488,7 @@ def get_plot_data():
                 primary_max = max(primary_max, series_ranges[col_str]['padded_max'])
         
         if primary_min != float('inf') and primary_max != float('-inf'):
-            fig.update_yaxes(range=[primary_min, primary_max], secondary_y=False)
+            fig.update_yaxes(range=[primary_min, primary_max], zeroline=False, showline=False, secondary_y=False)
         
         # Calculate ranges for secondary y-axis (second unit) if it exists
         if use_secondary:
@@ -448,7 +503,7 @@ def get_plot_data():
                     secondary_max = max(secondary_max, series_ranges[col_str]['padded_max'])
             
             if secondary_min != float('inf') and secondary_max != float('-inf'):
-                fig.update_yaxes(range=[secondary_min, secondary_max], secondary_y=True)
+                fig.update_yaxes(range=[secondary_min, secondary_max], zeroline=False, showline=False, secondary_y=True)
         
         # Add experiment phase lines
         experiment_log = load_experiment_log()
@@ -473,10 +528,11 @@ def get_plot_data():
                             x0=phase_time, x1=phase_time,
                             y0=0, y1=1,
                             yref="paper",
+                            layer="below",
                             line=dict(
                                 color="black",
                                 width=1,
-                                dash="dash"
+                                dash="solid"
                             )
                         )
                         fig.add_annotation(
@@ -511,7 +567,7 @@ def get_plot_data():
             ),
             
             # TITLE STYLING
-            title_font=dict(size=16, color="#2c3e50"),
+            title_font=dict(size=12, color="#2c3e50"),
             
             # GRID & AXES
             xaxis=dict(
@@ -519,8 +575,13 @@ def get_plot_data():
                 gridwidth=1,
                 gridcolor="rgba(128,128,128,0.2)",
                 showline=True,
-                linewidth=1,
+                linewidth=2,
                 linecolor="black"
+            ),
+            yaxis=dict(
+                showgrid=False,
+                zeroline=False,  # Remove the horizontal line at y=0
+                showline=False,  # Remove the y-axis spine line
             ),
             
             # MARGINS
@@ -529,13 +590,31 @@ def get_plot_data():
         
         # Create legend data for custom legend
         legend_data = []
-        for col in cols:
-            unit = get_unit(col)
+        color_index = 0
+        
+        # Add primary axis series to legend
+        for col in unit_map[units[0]]:
+            primary_color, _ = color_pairs[color_index]
             legend_data.append({
                 'name': str(col),
-                'unit': unit,
-                'style': 'solid' if unit == units[0] else 'dashed'
+                'unit': units[0],
+                'style': 'solid',
+                'color': primary_color
             })
+            color_index += 1
+        
+        # Add secondary axis series to legend if they exist
+        if use_secondary:
+            color_index = 0  # Reset for secondary axis
+            for col in unit_map[units[1]]:
+                _, secondary_color = color_pairs[color_index]
+                legend_data.append({
+                    'name': str(col),
+                    'unit': units[1],
+                    'style': 'dashed',
+                    'color': secondary_color
+                })
+                color_index += 1
         
         return jsonify({
             'plot': json.loads(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)),
@@ -543,6 +622,561 @@ def get_plot_data():
             'warning': warning
         })
         
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/experiment/<experiment_code>/temperatures')
+def get_experiment_temperatures(experiment_code):
+    """Calculate mean surface and air temperatures for an experiment"""
+    if not experiment_code:
+        return jsonify({'error': 'No experiment selected'})
+    
+    feather_filename = get_feather_filename_from_experiment(experiment_code)
+    
+    if not feather_file_exists(experiment_code):
+        return jsonify({'error': f'Data file not found for experiment {experiment_code}'})
+    
+    try:
+        df = load_df(feather_filename)
+        
+        # Define temperature series patterns
+        surface_temp_patterns = [
+            'surface_temperature-degrees_celsius'
+        ]
+        
+        air_temp_patterns = [
+            'Comfort Cube_air_temperature-degrees_celsius',
+            'Comfort Cube_standard_effective_temperature-degrees_celsius',
+            'Nano Cube_average_air_temperature-degrees_celsius',
+            'cDAQ_interior_cube_air_temperature-degrees_celsius'
+        ]
+        
+        # Find surface temperature columns
+        surface_cols = []
+        for col in df.columns:
+            col_str = str(col)
+            if any(pattern in col_str for pattern in surface_temp_patterns):
+                surface_cols.append(col)
+        
+        # Find air temperature columns (prioritize Comfort Cube)
+        air_cols = []
+        for pattern in air_temp_patterns:
+            for col in df.columns:
+                col_str = str(col)
+                if col_str == pattern:
+                    air_cols.append(col)
+                    break
+        
+        # Calculate means
+        surface_temp_mean = None
+        air_temp_mean = None
+        
+        if surface_cols:
+            # Calculate mean of all surface temperature measurements
+            surface_data = df[surface_cols].mean(axis=1)
+            surface_temp_mean = round(surface_data.mean(), 1)
+        
+        if air_cols:
+            # Use the first available air temperature (prioritized by air_temp_patterns order)
+            air_data = df[air_cols[0]]
+            air_temp_mean = round(air_data.mean(), 1)
+        
+        return jsonify({
+            'surface_temp': surface_temp_mean,
+            'air_temp': air_temp_mean,
+            'surface_cols_found': len(surface_cols),
+            'air_cols_found': len(air_cols),
+            'surface_cols': [str(col) for col in surface_cols],
+            'air_cols': [str(col) for col in air_cols]
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Error calculating temperatures: {str(e)}'})
+
+@app.route('/api/compare-plot')
+def get_compare_plot_data():
+    """Generate comparison plot for multiple experiments with max 2 series"""
+    experiment_codes = request.args.getlist('experiments[]')
+    selected_series = request.args.getlist('series[]')
+    
+    if not experiment_codes or not selected_series:
+        return jsonify({'error': 'Missing experiment codes or series'})
+    
+    if len(selected_series) > 2:
+        return jsonify({'error': 'Maximum 2 series allowed for comparison'})
+    
+    if len(experiment_codes) == 0:
+        return jsonify({'error': 'No experiments selected'})
+    
+    try:
+        # Load data for all experiments and align to measurement start
+        experiment_data = {}
+        measurement_start_times = {}
+        experiment_log = load_experiment_log()
+        
+        # First pass: load data and get measurement start times
+        for exp_code in experiment_codes:
+            feather_filename = get_feather_filename_from_experiment(exp_code)
+            if not feather_file_exists(exp_code):
+                return jsonify({'error': f'Data file not found for experiment {exp_code}'})
+            
+            df = load_df(feather_filename)
+            if not isinstance(df.index, pd.DatetimeIndex):
+                df.index = pd.to_datetime(df.index)
+            
+            # Get measurement start time from experiment log
+            measurement_start_time = None
+            if experiment_log and exp_code in experiment_log:
+                exp_data = experiment_log[exp_code]
+                date = exp_data.get('Date', '')
+                if 'Start measurement' in exp_data:
+                    measurement_start_time = parse_experiment_time(date, exp_data['Start measurement'])
+            
+            experiment_data[exp_code] = df
+            measurement_start_times[exp_code] = measurement_start_time
+        
+        # Second pass: align data to measurement start and find the longest experiment
+        aligned_data = {}
+        longest_experiment_length = 0
+        earliest_start_offset = 0  # Track the earliest start relative to measurement
+        
+        for exp_code in experiment_codes:
+            df = experiment_data[exp_code].copy()
+            measurement_start = measurement_start_times[exp_code]
+            
+            if measurement_start is not None:
+                # Ensure both datetime objects are timezone-naive for comparison
+                if df.index.tz is not None:
+                    df.index = df.index.tz_localize(None)
+                if hasattr(measurement_start, 'tzinfo') and measurement_start.tzinfo is not None:
+                    measurement_start = measurement_start.replace(tzinfo=None)
+                
+                # Find the closest data point to measurement start time
+                try:
+                    time_diffs = abs(df.index - measurement_start)
+                    min_diff_idx = time_diffs.argmin()
+                    measurement_start_position = min_diff_idx
+                    
+                    # Calculate minutes from measurement start for each data point
+                    # Negative values = before measurement start, positive = after
+                    minutes_from_measurement = []
+                    for i, timestamp in enumerate(df.index):
+                        time_diff = timestamp - measurement_start
+                        minutes_diff = time_diff.total_seconds() / 60.0
+                        minutes_from_measurement.append(round(minutes_diff))
+                    
+                    df.index = pd.Index(minutes_from_measurement, name='minutes_from_measurement_start')
+                    aligned_data[exp_code] = df
+                    
+                    # Track the longest experiment and earliest start
+                    experiment_length = len(df)
+                    if experiment_length > longest_experiment_length:
+                        longest_experiment_length = experiment_length
+                    
+                    # Track the earliest start time (most negative)
+                    min_time = min(minutes_from_measurement)
+                    if min_time < earliest_start_offset:
+                        earliest_start_offset = min_time
+                        
+                except Exception as e:
+                    print(f"Error aligning experiment {exp_code}: {e}")
+                    # Fallback: create simple minute-based index starting from 0
+                    df.index = range(len(df))
+                    aligned_data[exp_code] = df
+                    if len(df) > longest_experiment_length:
+                        longest_experiment_length = len(df)
+            else:
+                # Fallback: create simple minute-based index starting from 0
+                df.index = range(len(df))
+                aligned_data[exp_code] = df
+                if len(df) > longest_experiment_length:
+                    longest_experiment_length = len(df)
+        
+        # Convert stringified tuples back to tuples if needed
+        cols = []
+        for s in selected_series:
+            try:
+                col = ast.literal_eval(s)
+            except Exception:
+                col = s
+            cols.append(col)
+        
+        # Group columns by unit
+        unit_map = {}
+        for col in cols:
+            unit = get_unit(col)
+            if unit not in unit_map:
+                unit_map[unit] = []
+            unit_map[unit].append(col)
+        
+        units = list(unit_map.keys())
+        warning = ''
+        if len(units) > 2:
+            warning = f'Warning: More than two units selected ({", ".join(units)}). Only the first two will be plotted.'
+            units = units[:2]
+            cols = []
+            for unit in units:
+                cols.extend(unit_map[unit])
+        
+        # Create figure with secondary y-axis if needed
+        use_secondary = len(units) > 1
+        fig = make_subplots(specs=[[{"secondary_y": use_secondary}]])
+        
+        # Generate colors based on experiment idx
+        experiment_colors = {}
+        for i, exp_code in enumerate(experiment_codes):
+            # Extract idx number for consistent coloring
+            idx_match = re.match(r'idx-(\d+)', exp_code)
+            idx_number = int(idx_match.group(1)) if idx_match else i
+            
+            # Use a color palette that cycles through colors
+            colors = [
+                '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+                '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+            ]
+            experiment_colors[exp_code] = colors[idx_number % len(colors)]
+        
+        # Plot first unit on primary y-axis (solid lines)
+        for col in unit_map[units[0]]:
+            for exp_code in experiment_codes:
+                df = aligned_data[exp_code]
+                if col in df.columns:
+                    # Extract idx for trace name
+                    idx_match = re.match(r'idx-(\d+)', exp_code)
+                    idx_number = idx_match.group(1).zfill(3) if idx_match else exp_code
+                    
+                    fig.add_trace(
+                        go.Scatter(
+                            x=df.index, 
+                            y=df[col], 
+                            mode='lines', 
+                            name=f'{idx_number} - {str(col)}',
+                            line=dict(width=2, color=experiment_colors[exp_code]),
+                            showlegend=True
+                        ),
+                        secondary_y=False
+                    )
+        
+        # Plot second unit on secondary y-axis (dashed lines)
+        if use_secondary:
+            for col in unit_map[units[1]]:
+                for exp_code in experiment_codes:
+                    df = aligned_data[exp_code]
+                    if col in df.columns:
+                        # Extract idx for trace name
+                        idx_match = re.match(r'idx-(\d+)', exp_code)
+                        idx_number = idx_match.group(1).zfill(3) if idx_match else exp_code
+                        
+                        fig.add_trace(
+                            go.Scatter(
+                                x=df.index, 
+                                y=df[col], 
+                                mode='lines', 
+                                name=f'{idx_number} - {str(col)}',
+                                line=dict(dash='dash', width=2, color=experiment_colors[exp_code]),
+                                showlegend=True
+                            ),
+                            secondary_y=True
+                        )
+            
+            fig.update_yaxes(title_text=f"Primary ({units[0]})", zeroline=False, showline=False, secondary_y=False)
+            fig.update_yaxes(title_text=f"Secondary ({units[1]})", zeroline=False, showline=False, secondary_y=True)
+        else:
+            fig.update_yaxes(title_text=f"Value ({units[0]})", zeroline=False, showline=False, secondary_y=False)
+        
+        # Apply standardized y-axis ranges
+        series_ranges = load_series_ranges()
+        
+        # Calculate ranges for primary y-axis (first unit)
+        primary_cols = unit_map[units[0]]
+        primary_min = float('inf')
+        primary_max = float('-inf')
+        
+        for col in primary_cols:
+            col_str = str(col)
+            if col_str in series_ranges:
+                primary_min = min(primary_min, series_ranges[col_str]['padded_min'])
+                primary_max = max(primary_max, series_ranges[col_str]['padded_max'])
+        
+        if primary_min != float('inf') and primary_max != float('-inf'):
+            fig.update_yaxes(range=[primary_min, primary_max], zeroline=False, showline=False, secondary_y=False)
+        
+        # Calculate ranges for secondary y-axis (second unit) if it exists
+        if use_secondary:
+            secondary_cols = unit_map[units[1]]
+            secondary_min = float('inf')
+            secondary_max = float('-inf')
+            
+            for col in secondary_cols:
+                col_str = str(col)
+                if col_str in series_ranges:
+                    secondary_min = min(secondary_min, series_ranges[col_str]['padded_min'])
+                    secondary_max = max(secondary_max, series_ranges[col_str]['padded_max'])
+            
+            if secondary_min != float('inf') and secondary_max != float('-inf'):
+                fig.update_yaxes(range=[secondary_min, secondary_max], zeroline=False, showline=False, secondary_y=True)
+        
+        # Update layout
+        fig.update_layout(
+            title=f"Comparison: {', '.join([re.match(r'idx-(\d+)', exp_code).group(1).zfill(3) if re.match(r'idx-(\d+)', exp_code) else exp_code for exp_code in experiment_codes])}",
+            xaxis_title="Minutes from Measurement Start",
+            showlegend=False,  # Hide the default Plotly legend since we have a custom one
+    
+            # THEME & COLORS
+            template="plotly_white",
+            
+            # DIMENSIONS - Let Plotly auto-size to container
+            autosize=True,
+            
+            # FONTS
+            font=dict(
+                family="Source Code Pro, monospace",
+                size=10,
+                color="#333"
+            ),
+            
+            # TITLE STYLING
+            title_font=dict(size=12, color="#2c3e50"),
+            
+            # GRID & AXES
+            xaxis=dict(
+                showgrid=False,
+                gridwidth=1,
+                gridcolor="rgba(128,128,128,0.2)",
+                showline=True,
+                linewidth=2,
+                linecolor="black"
+            ),
+            yaxis=dict(
+                showgrid=False,
+                zeroline=False,
+                showline=False,
+            ),
+            
+            # MARGINS
+            margin=dict(l=50, r=50, t=50, b=50)
+        )
+        
+        # Create legend data for custom legend
+        legend_data = []
+        
+        # Add primary axis series to legend
+        for col in unit_map[units[0]]:
+            for exp_code in experiment_codes:
+                df = aligned_data[exp_code]
+                if col in df.columns:
+                    idx_match = re.match(r'idx-(\d+)', exp_code)
+                    idx_number = idx_match.group(1).zfill(3) if idx_match else exp_code
+                    legend_data.append({
+                        'name': f'{idx_number} - {str(col)}',
+                        'unit': units[0],
+                        'style': 'solid',
+                        'color': experiment_colors[exp_code]
+                    })
+        
+        # Add secondary axis series to legend if they exist
+        if use_secondary:
+            for col in unit_map[units[1]]:
+                for exp_code in experiment_codes:
+                    df = aligned_data[exp_code]
+                    if col in df.columns:
+                        idx_match = re.match(r'idx-(\d+)', exp_code)
+                        idx_number = idx_match.group(1).zfill(3) if idx_match else exp_code
+                        legend_data.append({
+                            'name': f'{idx_number} - {str(col)}',
+                            'unit': units[1],
+                            'style': 'dashed',
+                            'color': experiment_colors[exp_code]
+                        })
+        
+        return jsonify({
+            'plot': json.loads(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)),
+            'legend': legend_data,
+            'warning': warning
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/plot-data')
+def download_single_plot_data():
+    """Download plot data for single experiment as CSV"""
+    experiment_code = request.args.get('experiment')
+    selected_series = request.args.getlist('series[]')
+    format_type = request.args.get('format', 'csv')
+    
+    if not (experiment_code and selected_series):
+        return jsonify({'error': 'Missing experiment code or series'})
+    
+    feather_filename = get_feather_filename_from_experiment(experiment_code)
+    
+    if not feather_file_exists(experiment_code):
+        return jsonify({'error': f'Data file not found for experiment {experiment_code}'})
+    
+    try:
+        df = load_df(feather_filename)
+        
+        # Convert stringified tuples back to tuples if needed
+        cols = []
+        for s in selected_series:
+            try:
+                col = ast.literal_eval(s)
+            except Exception:
+                col = s
+            if col in df.columns:
+                cols.append(col)
+        
+        if not cols:
+            return jsonify({'error': 'No valid columns selected'})
+        
+        # Create output dataframe with selected series
+        output_df = df[cols].copy()
+        
+        if format_type.lower() == 'csv':
+            # Create CSV response
+            from io import StringIO
+            output = StringIO()
+            output_df.to_csv(output)
+            output.seek(0)
+            
+            response = make_response(output.getvalue())
+            response.headers['Content-Type'] = 'text/csv'
+            response.headers['Content-Disposition'] = f'attachment; filename={experiment_code}_plot_data.csv'
+            return response
+        else:
+            return jsonify({'error': 'Unsupported format'})
+            
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/compare-plot-data')
+def download_compare_plot_data():
+    """Download comparison plot data as CSV"""
+    experiment_codes = request.args.getlist('experiments[]')
+    selected_series = request.args.getlist('series[]')
+    format_type = request.args.get('format', 'csv')
+    
+    if not experiment_codes or not selected_series:
+        return jsonify({'error': 'Missing experiment codes or series'})
+    
+    try:
+        # Load and align data (reuse logic from compare plot)
+        experiment_data = {}
+        measurement_start_times = {}
+        experiment_log = load_experiment_log()
+        
+        # Load data and get measurement start times
+        for exp_code in experiment_codes:
+            feather_filename = get_feather_filename_from_experiment(exp_code)
+            if not feather_file_exists(exp_code):
+                return jsonify({'error': f'Data file not found for experiment {exp_code}'})
+            
+            df = load_df(feather_filename)
+            if not isinstance(df.index, pd.DatetimeIndex):
+                df.index = pd.to_datetime(df.index)
+            
+            measurement_start_time = None
+            if experiment_log and exp_code in experiment_log:
+                exp_data = experiment_log[exp_code]
+                date = exp_data.get('Date', '')
+                if 'Start measurement' in exp_data:
+                    measurement_start_time = parse_experiment_time(date, exp_data['Start measurement'])
+            
+            experiment_data[exp_code] = df
+            measurement_start_times[exp_code] = measurement_start_time
+        
+        # Align data to measurement start
+        aligned_data = {}
+        for exp_code in experiment_codes:
+            df = experiment_data[exp_code].copy()
+            measurement_start = measurement_start_times[exp_code]
+            
+            if measurement_start is not None:
+                if df.index.tz is not None:
+                    df.index = df.index.tz_localize(None)
+                if hasattr(measurement_start, 'tzinfo') and measurement_start.tzinfo is not None:
+                    measurement_start = measurement_start.replace(tzinfo=None)
+                
+                try:
+                    minutes_from_measurement = []
+                    for i, timestamp in enumerate(df.index):
+                        time_diff = timestamp - measurement_start
+                        minutes_diff = time_diff.total_seconds() / 60.0
+                        minutes_from_measurement.append(round(minutes_diff))
+                    
+                    df.index = pd.Index(minutes_from_measurement, name='minutes_from_measurement_start')
+                    aligned_data[exp_code] = df
+                except Exception:
+                    df.index = range(len(df))
+                    aligned_data[exp_code] = df
+            else:
+                df.index = range(len(df))
+                aligned_data[exp_code] = df
+        
+        # Convert stringified tuples back to tuples if needed
+        cols = []
+        for s in selected_series:
+            try:
+                col = ast.literal_eval(s)
+            except Exception:
+                col = s
+            cols.append(col)
+        
+        # Create combined dataframe
+        combined_data = {}
+        combined_data['minutes_from_measurement_start'] = []
+        
+        for exp_code in experiment_codes:
+            df = aligned_data[exp_code]
+            idx_match = re.match(r'idx-(\d+)', exp_code)
+            idx_number = idx_match.group(1).zfill(3) if idx_match else exp_code
+            
+            for col in cols:
+                if col in df.columns:
+                    column_name = f"{idx_number}_{str(col)}"
+                    combined_data[column_name] = []
+        
+        # Get all unique time points
+        all_time_points = set()
+        for exp_code in experiment_codes:
+            df = aligned_data[exp_code]
+            all_time_points.update(df.index.tolist())
+        
+        all_time_points = sorted(all_time_points)
+        
+        # Fill data for each time point
+        for time_point in all_time_points:
+            combined_data['minutes_from_measurement_start'].append(time_point)
+            
+            for exp_code in experiment_codes:
+                df = aligned_data[exp_code]
+                idx_match = re.match(r'idx-(\d+)', exp_code)
+                idx_number = idx_match.group(1).zfill(3) if idx_match else exp_code
+                
+                for col in cols:
+                    if col in df.columns:
+                        column_name = f"{idx_number}_{str(col)}"
+                        if time_point in df.index:
+                            combined_data[column_name].append(df.loc[time_point, col])
+                        else:
+                            combined_data[column_name].append('')  # Empty for missing data points
+        
+        # Create DataFrame and export
+        output_df = pd.DataFrame(combined_data)
+        
+        if format_type.lower() == 'csv':
+            from io import StringIO
+            output = StringIO()
+            output_df.to_csv(output, index=False)
+            output.seek(0)
+            
+            response = make_response(output.getvalue())
+            response.headers['Content-Type'] = 'text/csv'
+            response.headers['Content-Disposition'] = f'attachment; filename=comparison_plot_data.csv'
+            return response
+        else:
+            return jsonify({'error': 'Unsupported format'})
+            
     except Exception as e:
         return jsonify({'error': str(e)})
 

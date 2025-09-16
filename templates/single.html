@@ -47,10 +47,21 @@
                 
                 <div class="mb-3">
                     <div class="radio-group" id="Ti-radio-group">
-                        <label class="form-label radio-group-label">Ti - Elevation (°):</label>
+                        <label class="form-label radio-group-label">Ti - Tilt (°):</label>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="Ti-filter" id="Ti-all" value="all" checked>
                             <label class="form-check-label" for="Ti-all">All</label>
+                        </div>
+                        <!-- Dynamic radio buttons will be added here -->
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="radio-group" id="Type-radio-group">
+                        <label class="form-label radio-group-label">Type:</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="Type-filter" id="Type-all" value="all" checked>
+                            <label class="form-check-label" for="Type-all">All</label>
                         </div>
                         <!-- Dynamic radio buttons will be added here -->
                     </div>
@@ -107,6 +118,10 @@
                 <hr>
                 <h4>Legend</h4>
                 <div id="custom-legend"></div>
+                <hr>
+                <button id="download-plot-data" class="btn btn-sm btn-outline-primary w-100" disabled>
+                    <i class="fas fa-download me-1"></i>Download Plot Data
+                </button>
             </div>
         </div>
     </div>
@@ -164,7 +179,7 @@ function loadExperimentCharacteristics() {
 }
 
 function setupRadioButtons() {
-    const params = ['G', 'T', 'A', 'Ti'];
+    const params = ['G', 'T', 'A', 'Ti', 'Type'];
     
     params.forEach(param => {
         const uniqueValues = filterRanges[param].values; // Use the unique values from the API
@@ -197,7 +212,7 @@ function setupRadioButtons() {
     });
     
     // Add event listeners to "All" radio buttons
-    ['G', 'T', 'A', 'Ti'].forEach(param => {
+    ['G', 'T', 'A', 'Ti', 'Type'].forEach(param => {
         document.getElementById(`${param}-all`).addEventListener('change', filterExperiments);
     });
 }
@@ -214,6 +229,14 @@ function getSelectedFilters() {
         }
     });
     
+    // Handle Type parameter separately (it's a string, not numeric)
+    const typeRadio = document.querySelector(`input[name="Type-filter"]:checked`);
+    if (typeRadio && typeRadio.value !== 'all') {
+        filters['Type'] = typeRadio.value; // Keep as string
+    } else {
+        filters['Type'] = 'all'; // No filter applied
+    }
+    
     return filters;
 }
 
@@ -225,7 +248,8 @@ function filterExperiments() {
         return (filters.G === 'all' || chars.G === filters.G) &&
                (filters.T === 'all' || chars.T === filters.T) &&
                (filters.A === 'all' || chars.A === filters.A) &&
-               (filters.Ti === 'all' || chars.Ti === filters.Ti);
+               (filters.Ti === 'all' || chars.Ti === filters.Ti) &&
+               (filters.Type === 'all' || chars.Type === filters.Type);
     });
     
     // Update filtered experiments dropdown
@@ -356,10 +380,22 @@ $('#series-dropdown').change(function() {
     updatePlot();
 });
 
-// Handle download button
+// Handle download button (raw data)
 $('#download-button').click(function() {
     if (!currentExperiment) return;
     window.location.href = `/download/${currentExperiment}`;
+});
+
+// Handle download plot data button
+$('#download-plot-data').click(function() {
+    if (!currentExperiment || !currentSeries.length) return;
+    
+    const queryParams = new URLSearchParams();
+    queryParams.append('experiment', currentExperiment);
+    currentSeries.forEach(series => queryParams.append('series[]', series));
+    queryParams.append('format', 'csv');
+    
+    window.location.href = `/api/plot-data?${queryParams.toString()}`;
 });
 
 function updatePlot() {
@@ -380,6 +416,9 @@ function updatePlot() {
         
         // Update custom legend
         updateCustomLegend(data.legend || []);
+        
+        // Enable download button
+        $('#download-plot-data').prop('disabled', false);
     });
 }
 
@@ -393,7 +432,8 @@ function updateCustomLegend(legendData) {
     }
     
     legendData.forEach((item, index) => {
-        const color = getTraceColor(index);
+        // Use color from the legend data if available, otherwise fall back to default
+        const color = item.color || getTraceColor(index);
         const lineStyle = item.style === 'dashed' ? 'dashed' : 'solid';
         
         const legendItem = $(`
