@@ -1193,6 +1193,41 @@ def download_data(experiment_code):
     
     return send_file(feather_path, as_attachment=True)
 
+@app.route('/api/facility-images/<folder>')
+def get_facility_images(folder):
+    """Get list of images in a facility folder"""
+    try:
+        # Define allowed folders for security
+        allowed_folders = ['led-solar-simulator', 'data-acquisition', 'climate-chamber']
+        
+        if folder not in allowed_folders:
+            return jsonify({'error': 'Invalid folder name'}), 400
+        
+        # Path to the facility images folder
+        facility_path = os.path.join(THIS_FOLDER, 'static', 'images', 'facilities', folder)
+        
+        if not os.path.exists(facility_path):
+            return jsonify([])  # Return empty list if folder doesn't exist
+        
+        # Get all image files (common image extensions)
+        image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'}
+        images = []
+        
+        for filename in os.listdir(facility_path):
+            file_path = os.path.join(facility_path, filename)
+            if os.path.isfile(file_path):
+                _, ext = os.path.splitext(filename.lower())
+                if ext in image_extensions:
+                    images.append(filename)
+        
+        # Sort images by name for consistent ordering
+        images.sort()
+        
+        return jsonify(images)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == "__main__":
     app.run(host='localhost', port = 5001, debug=True)
 
