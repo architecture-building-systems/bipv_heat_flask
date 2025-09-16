@@ -108,17 +108,14 @@ cp /path/to/experiment_log.pkl /instances/home/asbipvheatprd/bipv_heat_flask/dat
 # 1. Stop application
 kill $(cat /tmp/gunicorn.pid)
 
-# 2. Backup current code (optional but recommended)
-cp -r /instances/home/asbipvheatprd/bipv_heat_flask/ /tmp/bipv_heat_flask_backup_$(date +%Y%m%d)
+# 2. Update code files
+git pull
 
-# 3. Update code files
-# ... copy new main.py, templates, static files, etc. ...
-
-# 4. Restart application
+# 3. Restart application
 cd /instances/home/asbipvheatprd/bipv_heat_flask/
 gunicorn --bind 0.0.0.0:5001 --daemon --pid /tmp/gunicorn.pid wsgi:application
 
-# 5. Test deployment
+# 4. Test deployment
 curl -k https://asbipvheatprd.ethz.ch
 ```
 
