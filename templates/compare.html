@@ -305,7 +305,7 @@ function updateExperimentTable() {
     
     Promise.all(promises).then(results => {
         let tableHtml = '<div class="table-responsive"><table class="table table-sm table-striped">';
-        tableHtml += '<thead><tr><th>Idx</th><th>Date</th><th>IR</th><th>WW</th><th>CW</th><th>Mean Surface (˚C)</th><th>Mean Room (˚C)</th></tr></thead><tbody>';
+        tableHtml += '<thead><tr><th>idx</th><th>Date</th><th>IR</th><th>WW</th><th>CW</th><th>Mean Surface (˚C)</th><th>Mean Room (˚C)</th></tr></thead><tbody>';
         
         results.forEach(({ code, data }) => {
             const details = data.experiment_details;

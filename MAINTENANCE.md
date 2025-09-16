@@ -105,18 +105,28 @@ cp /path/to/experiment_log.pkl /instances/home/asbipvheatprd/bipv_heat_flask/dat
 
 **Steps**:
 ```bash
-# 1. Stop application
-kill $(cat /tmp/gunicorn.pid)
-
-# 2. Update code files
+# git pull
+cd /instances/home/asbipvheatprd/bipv_heat_flask/
 git pull
 
-# 3. Restart application
+# 1. Kill all gunicorn processes
+pkill -f gunicorn
+
+# 2. Wait for processes to fully stop
+sleep 3
+
+# 3. Clear Python cache (in case there are cached .pyc files)
+find /instances/home/asbipvheatprd/bipv_heat_flask -name "*.pyc" -delete
+find /instances/home/asbipvheatprd/bipv_heat_flask -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null
+
+# 4. Navigate to Flask directory
 cd /instances/home/asbipvheatprd/bipv_heat_flask/
+
+# 5. Start Flask with new code
 gunicorn --bind 0.0.0.0:5001 --daemon --pid /tmp/gunicorn.pid wsgi:application
 
-# 4. Test deployment
-curl -k https://asbipvheatprd.ethz.ch
+# 6. Test that it's working with new code
+curl http://localhost:5001/home
 ```
 
 ### Scenario 5: Server Reboot
