@@ -682,7 +682,7 @@ hr {
 /* Experiment details */
 #experiment-details p {
     margin-bottom: 3px;
-    font-size: 10px;
+    font-size: 8px;
 }
 
 /* Removed empty ruleset for #filtered-experiments */

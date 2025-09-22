@@ -11,6 +11,7 @@ import json
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 import numpy as np
+import utilities
 
 app = Flask(__name__, static_folder="static")
 
@@ -272,14 +273,20 @@ def get_experiment_characteristics():
                     exp_data = experiment_log[exp_code]
                     experiments_with_chars.append({
                         'code': exp_code,
+                        'display_name': utilities.make_display_name(exp_code),
                         'label': f"{exp_code} ({exp_data.get('Date', 'Unknown date')})",
-                        'characteristics': chars
+                        # 'characteristics': chars
+                        
+                        'characteristics': {
+                            **chars,  # Include all original characteristics
+                            'Type_display': utilities.map_type_to_display_type(chars['Type'])  # Add display type
+                        }
                     })
                     all_G.append(chars['G'])
                     all_T.append(chars['T'])
                     all_A.append(chars['A'])
                     all_Ti.append(chars['Ti'])
-                    all_Type.append(chars['Type'])
+                    all_Type.append(utilities.map_type_to_display_type(chars['Type']))
     
     # Process feather files not in log
     feather_files = list_feather_files()
@@ -292,16 +299,23 @@ def get_experiment_characteristics():
             
         chars = parse_experiment_characteristics(exp_code)
         if chars:
+            # exp_code = exp_code.split("_")[0].split("-")[1]
             experiments_with_chars.append({
                 'code': exp_code,
+                'display_name': utilities.make_display_name(exp_code),
                 'label': f"{exp_code} (Data file)",
-                'characteristics': chars
+                # 'characteristics': chars
+                
+                'characteristics': {
+                    **chars,  # Include all original characteristics
+                    'Type_display': utilities.map_type_to_display_type(chars['Type'])  # Add display type
+                }
             })
             all_G.append(chars['G'])
             all_T.append(chars['T'])
             all_A.append(chars['A'])
             all_Ti.append(chars['Ti'])
-            all_Type.append(chars['Type'])
+            all_Type.append(utilities.map_type_to_display_type(chars['Type']))
     
     # Calculate ranges
     ranges = {
@@ -968,7 +982,7 @@ def get_compare_plot_data():
                     idx_match = re.match(r'idx-(\d+)', exp_code)
                     idx_number = idx_match.group(1).zfill(3) if idx_match else exp_code
                     legend_data.append({
-                        'name': f'{idx_number} - {str(col)}',
+                        'name': f'{utilities.make_display_name(exp_code)} - {str(col)}',
                         'unit': units[0],
                         'style': 'solid',
                         'color': experiment_colors[exp_code]
@@ -983,7 +997,7 @@ def get_compare_plot_data():
                         idx_match = re.match(r'idx-(\d+)', exp_code)
                         idx_number = idx_match.group(1).zfill(3) if idx_match else exp_code
                         legend_data.append({
-                            'name': f'{idx_number} - {str(col)}',
+                            'name': f'{idx_number} ({str(col)})',
                             'unit': units[1],
                             'style': 'dashed',
                             'color': experiment_colors[exp_code]

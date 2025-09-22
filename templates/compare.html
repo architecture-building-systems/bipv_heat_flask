@@ -140,144 +140,17 @@
 <script>
 let selectedExperiments = [];
 let currentSeries = [];
-let allExperiments = [];
-let filterRanges = {};
 let experimentDetails = {};
 
-// Default series - air temperature from comfort cube
-const DEFAULT_SERIES = 'Comfort Cube_standard_effective_temperature-degrees_celsius';
-
-// Local storage key for persisting series selection
-const SERIES_STORAGE_KEY = 'bipv_compare_selected_series';
-
-// Helper functions for localStorage
-function saveSelectedSeries(seriesArray) {
-    try {
-        localStorage.setItem(SERIES_STORAGE_KEY, JSON.stringify(seriesArray));
-    } catch (e) {
-        console.warn('Failed to save series selection to localStorage:', e);
-    }
-}
-
-function getSavedSeries() {
-    try {
-        const saved = localStorage.getItem(SERIES_STORAGE_KEY);
-        return saved ? JSON.parse(saved) : null;
-    } catch (e) {
-        console.warn('Failed to load series selection from localStorage:', e);
-        return null;
-    }
+// Page-specific callback for handling filtered experiments update (no auto-selection for compare)
+function handleFilteredExperimentsUpdate(filteredExperiments) {
+    // Compare page doesn't auto-select experiments
 }
 
 // Load experiments and setup filters on page load
 $(document).ready(function() {
     loadExperimentCharacteristics();
 });
-
-function loadExperimentCharacteristics() {
-    $.get('/api/experiment-characteristics', function(data) {
-        allExperiments = data.experiments;
-        filterRanges = data.ranges;
-        
-        // Setup radio buttons with unique values
-        setupRadioButtons();
-        
-        // Initial filter
-        filterExperiments();
-    });
-}
-
-function setupRadioButtons() {
-    const params = ['G', 'T', 'A', 'Ti', 'Type'];
-    
-    params.forEach(param => {
-        const uniqueValues = filterRanges[param].values; // Use the unique values from the API
-        const radioGroup = document.getElementById(`${param}-radio-group`);
-        
-        // Add radio buttons for each unique value
-        uniqueValues.forEach(value => {
-            const radioDiv = document.createElement('div');
-            radioDiv.className = 'form-check form-check-inline';
-            
-            const radioInput = document.createElement('input');
-            radioInput.className = 'form-check-input';
-            radioInput.type = 'radio';
-            radioInput.name = `${param}-filter`;
-            radioInput.id = `${param}-${value}`;
-            radioInput.value = value;
-            
-            const radioLabel = document.createElement('label');
-            radioLabel.className = 'form-check-label';
-            radioLabel.setAttribute('for', `${param}-${value}`);
-            radioLabel.textContent = value;
-            
-            radioDiv.appendChild(radioInput);
-            radioDiv.appendChild(radioLabel);
-            radioGroup.appendChild(radioDiv);
-            
-            // Add event listener
-            radioInput.addEventListener('change', filterExperiments);
-        });
-    });
-    
-    // Add event listeners to "All" radio buttons
-    ['G', 'T', 'A', 'Ti', 'Type'].forEach(param => {
-        document.getElementById(`${param}-all`).addEventListener('change', filterExperiments);
-    });
-}
-
-function getSelectedFilters() {
-    const filters = {};
-    
-    ['G', 'T', 'A', 'Ti'].forEach(param => {
-        const checkedRadio = document.querySelector(`input[name="${param}-filter"]:checked`);
-        if (checkedRadio && checkedRadio.value !== 'all') {
-            filters[param] = parseInt(checkedRadio.value);
-        } else {
-            filters[param] = 'all'; // No filter applied
-        }
-    });
-    
-    // Handle Type parameter separately (it's a string, not numeric)
-    const typeRadio = document.querySelector(`input[name="Type-filter"]:checked`);
-    if (typeRadio && typeRadio.value !== 'all') {
-        filters['Type'] = typeRadio.value; // Keep as string
-    } else {
-        filters['Type'] = 'all'; // No filter applied
-    }
-    
-    return filters;
-}
-
-function filterExperiments() {
-    const filters = getSelectedFilters();
-    
-    const filteredExperiments = allExperiments.filter(exp => {
-        const chars = exp.characteristics;
-        return (filters.G === 'all' || chars.G === filters.G) &&
-               (filters.T === 'all' || chars.T === filters.T) &&
-               (filters.A === 'all' || chars.A === filters.A) &&
-               (filters.Ti === 'all' || chars.Ti === filters.Ti) &&
-               (filters.Type === 'all' || chars.Type === filters.Type);
-    });
-    
-    // Update filtered experiments dropdown
-    const dropdown = $('#filtered-experiments');
-    dropdown.empty();
-    
-    if (filteredExperiments.length === 0) {
-        dropdown.append('<option disabled>No experiments match filters</option>');
-    } else {
-        filteredExperiments.forEach(exp => {
-            const chars = exp.characteristics;
-            const label = `${exp.code} (G:${chars.G}, T:${chars.T}, A:${chars.A}, Ti:${chars.Ti})`;
-            dropdown.append($('<option>', {
-                value: exp.code,
-                text: label
-            }));
-        });
-    }
-}
 
 // Handle experiment selection from filtered list
 $('#filtered-experiments').change(function() {
@@ -397,44 +270,13 @@ function updateSeriesDropdown() {
         });
         
         // Smart series selection logic
-        selectBestSeries(seriesOptions);
+        selectBestSeriesForCompare(seriesOptions);
     }
 }
 
-function selectBestSeries(availableSeries) {
-    const seriesDropdown = $('#series-dropdown');
-    const availableValues = availableSeries.map(s => s.value);
-    
-    // Get previously saved series
-    const savedSeries = getSavedSeries();
-    
-    let seriesToSelect = [];
-    
-    if (savedSeries && savedSeries.length > 0) {
-        // Try to restore saved series - keep only those available in this experiment
-        seriesToSelect = savedSeries.filter(series => availableValues.includes(series));
-        
-        if (seriesToSelect.length === 0) {
-            console.log('Previously selected series not available in this experiment, falling back to default');
-        }
-    }
-    
-    // If no saved series could be restored, use default
-    if (seriesToSelect.length === 0) {
-        if (availableValues.includes(DEFAULT_SERIES)) {
-            seriesToSelect = [DEFAULT_SERIES];
-            console.log('Using default series:', DEFAULT_SERIES);
-        } else {
-            // If default not available, use first available series
-            seriesToSelect = [availableSeries[0]?.value];
-            console.log('Default series not available, using first available:', seriesToSelect[0]);
-        }
-    }
-    
-    // Update dropdown and current selection
-    seriesDropdown.val(seriesToSelect);
-    currentSeries = seriesToSelect.filter(s => s); // Remove any null/undefined values
-    
+// Updated to use shared function and update currentSeries
+function selectBestSeriesForCompare(availableSeries) {
+    currentSeries = selectBestSeries(availableSeries, SERIES_STORAGE_KEY_COMPARE);
     console.log('Selected series for comparison:', currentSeries);
 }
 
@@ -443,7 +285,7 @@ $('#series-dropdown').change(function() {
     currentSeries = $(this).val() || [];
     
     // Save the selection to localStorage
-    saveSelectedSeries(currentSeries);
+    saveSelectedSeries(currentSeries, SERIES_STORAGE_KEY_COMPARE);
     
     // TODO: Update comparison plot
     updateComparisonPlot();
@@ -510,49 +352,6 @@ function updateComparisonPlot() {
     });
 }
 
-function updateCustomLegend(legendData) {
-    const legendContainer = $('#custom-legend');
-    legendContainer.empty();
-    
-    if (legendData.length === 0) {
-        legendContainer.html('<p class="text-muted small">No series selected</p>');
-        return;
-    }
-    
-    legendData.forEach((item, index) => {
-        // Use color from the legend data if available, otherwise fall back to default
-        const color = item.color || getTraceColor(index);
-        const lineStyle = item.style === 'dashed' ? 'dashed' : 'solid';
-        
-        const legendItem = $(`
-            <div class="legend-item mb-2">
-                <div class="d-flex align-items-center">
-                    <div class="legend-line me-2" style="
-                        width: 20px; 
-                        height: 2px; 
-                        background-color: ${color}; 
-                        border: ${lineStyle === 'dashed' ? '1px dashed ' + color : 'none'};
-                        background: ${lineStyle === 'dashed' ? 'none' : color};
-                    "></div>
-                    <div class="legend-text">
-                        <div class="legend-name" style="font-size: 11px; font-weight: 600;">${item.name}</div>
-                        <div class="legend-unit text-muted" style="font-size: 10px;">${item.unit}</div>
-                    </div>
-                </div>
-            </div>
-        `);
-        
-        legendContainer.append(legendItem);
-    });
-}
-
-function getTraceColor(index) {
-    // Plotly default color sequence
-    const colors = [
-        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
-    ];
-    return colors[index % colors.length];
-}
+// Legend functions are now in common.js
 </script>
 {% endblock %}
