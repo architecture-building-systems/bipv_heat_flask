@@ -398,6 +398,65 @@ td {
 .flex-shrink-0 { flex-shrink: 0; }
 .flex-grow-1 { flex-grow: 1; }
 
+
+/* Custom styling for hotspots begin */
+.custom-hotspot {
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 0, 0, 0.7);
+    border: 3px solid white;
+    border-radius: 50%;
+    cursor: crosshair;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.custom-hotspot:hover {
+    background-color: rgba(255, 0, 0, 1);
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* Style for the Pannellum tooltip */
+.pnlm-tooltip {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    color: white !important;
+    padding: 8px 12px !important;
+    border-radius: 4px !important;
+    font-family: 'Source Code Pro', monospace !important;
+    font-size: 12px !important;
+    max-width: 50px !important;
+    line-height: 1.4 !important;
+}
+
+/* Sensor info panel styling */
+#sensor-info-panel {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#sensor-info-panel h3 {
+    margin-top: 0;
+    color: #007bff;
+    font-family: 'Source Code Pro', monospace;
+}
+
+#sensor-info-panel strong {
+    color: #495057;
+}
+
+/* Custom styling for hotspots end */
+
 /* Responsive breakpoint classes */
 .col-sm-6 { flex: 0 0 50%; max-width: 50%; }
 

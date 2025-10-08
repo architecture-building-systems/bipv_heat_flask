@@ -3,13 +3,27 @@
 {% block title %}Sensors - BIPV Heat Dashboard{% endblock %}
 
 {% block content %}
+<!-- Pannellum CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-body text-center">
-                <h2 class="text-muted">Sensors Page</h2>
-                <p class="lead text-muted">This page will display sensor information and configurations.</p>
-                <p class="text-muted">Coming soon...</p>
+            <div class="card-body">
+                <h2>Sensor Layout - 360° View</h2>
+                <p class="text-muted">Explore the experimental setup in 360°. Click on markers to view sensor details.</p>
+                
+                <!-- Panorama Viewer Container -->
+                <div id="panorama" style="width: 100%; height: 600px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
+                
+                <!-- Sensor Info Panel (hidden by default, shown when marker clicked) -->
+                <div id="sensor-info-panel" style="display: none; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #007bff;">
+                    <h3 id="sensor-name">Sensor Name</h3>
+                    <p id="sensor-description">Sensor description will appear here...</p>
+                    <div id="sensor-details">
+                        <!-- Additional sensor metadata will be added here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -17,8 +31,93 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Pannellum JS -->
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+
 <script>
-// Sensors page specific JavaScript will go here
 console.log('Sensors page loaded');
+
+// Initialize the Pannellum viewer
+let viewer;
+
+$(document).ready(function() {
+    viewer = pannellum.viewer('panorama', {
+        "type": "equirectangular",
+        "panorama": "{{ url_for('static', filename='images/sensors/ledss_chamber_sphere.jpeg') }}",
+        // "panorama": "{{ url_for('static', filename='images/sensors/pano.jpg') }}",
+        // "panorama": "{{ url_for('static', filename='images/sensors/pano2.jpg') }}",
+        "autoLoad": true,
+        "showControls": true,
+        "mouseZoom": true,
+        "draggable": true,
+        "compass": false,
+        "hotSpotDebug": true,  // Set to true to get pitch/yaw coordinates when clicking
+        "hotSpots": [
+            {
+                "pitch": 90,  // Vertical angle (-90 to 90, 0 is horizon)
+                "yaw": 20,    // Horizontal angle (-180 to 180, 0 is center)
+                "type": "info",
+                "text": "Test Sensor<br>This is a test marker. Click for more details.",
+                "clickHandlerFunc": showSensorDetails,
+                "clickHandlerArgs": {
+                    "name": "Test Sensor",
+                    "description": "This is a test sensor marker to demonstrate the functionality.",
+                    "type": "Temperature Sensor",
+                    "location": "Test Location",
+                    "measurement": "Temperature",
+                    "unit": "°C"
+                },
+                "cssClass": "custom-hotspot"
+            },
+            {
+                "pitch": -5.688884280909887,  // Vertical angle (-90 to 90, 0 is horizon)
+                "yaw": 35.08399093074047,    // Horizontal angle (-180 to 180, 0 is center)
+                "type": "info",
+                "text": "Comfort Cube<br>This is a a CHAOSense product. Click for more details.",
+                "clickHandlerFunc": showSensorDetails,
+                "clickHandlerArgs": {
+                    "name": "Test Sensor",
+                    "description": "This is a test sensor marker to demonstrate the functionality.",
+                    "type": "Temperature Sensor",
+                    "location": "Test Location",
+                    "measurement": "Temperature",
+                    "unit": "°C"
+                },
+                "cssClass": "custom-hotspot"
+            }
+        ]
+    });
+    
+    console.log('Pannellum viewer initialized');
+    console.log('Tip: Set hotSpotDebug to true to get pitch/yaw coordinates for placing markers');
+});
+
+// Function to show sensor details when a marker is clicked
+function showSensorDetails(event, args) {
+    console.log('Sensor clicked:', args);
+    
+    // Update the sensor info panel
+    $('#sensor-name').text(args.name);
+    $('#sensor-description').text(args.description);
+    
+    // Build detailed information
+    let detailsHtml = '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px;">';
+    detailsHtml += `<div><strong>Type:</strong> ${args.type}</div>`;
+    detailsHtml += `<div><strong>Location:</strong> ${args.location}</div>`;
+    detailsHtml += `<div><strong>Measurement:</strong> ${args.measurement}</div>`;
+    detailsHtml += `<div><strong>Unit:</strong> ${args.unit}</div>`;
+    detailsHtml += '</div>';
+    
+    $('#sensor-details').html(detailsHtml);
+    
+    // Show the panel with animation
+    $('#sensor-info-panel').slideDown(300);
+    
+    // Scroll to the panel
+    $('html, body').animate({
+        scrollTop: $('#sensor-info-panel').offset().top - 20
+    }, 500);
+}
 </script>
+
 {% endblock %}
