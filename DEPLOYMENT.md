@@ -22,7 +22,8 @@ Internet → Apache (HTTPS:443) → Proxy → Gunicorn (localhost:5001) → Flas
 ### 1. Environment Setup
 ```bash
 # SSH to server
-ssh w3_asbipvheatprd@extweb01.ethz.ch
+ssh -o "IdentitiesOnly=yes" -i ".ssh/bipv_heat_key" w3_asbipvheatprd@asbipvheatprd.ethz.ch
+
 
 # Navigate to home directory
 cd /instances/home/asbipvheatprd/
